@@ -1,999 +1,207 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8" />
-  <title>Coffee Star • Coffee Box – Bodrum Pilot</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Supabase JS -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    :root {
-      --turquoise: #11b5c8;
-      --turquoise-dark: #0b7f8e;
-      --turquoise-soft: #e0f7fa;
-      --coffee-dark: #4b2e19;
-      --coffee-soft: #f4ece3;
-      --text-main: #1f2933;
-      --card-border: #cbd5e1;
-      --bg: #f1f5f9;
-      --accent: #f97316;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #e0fbff 0, #f8fafc 50%, #eef2ff 100%);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .app {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 16px;
-      padding-bottom: 64px;
-    }
-
-    /* HEADER */
-
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 18px;
-      margin-bottom: 12px;
-      border-radius: 20px;
-      background: linear-gradient(135deg, var(--turquoise), #0f9bb0);
-      color: #fff;
-      box-shadow: 0 18px 40px rgba(15, 155, 176, 0.35);
-      position: sticky;
-      top: 12px;
-      z-index: 10;
-      backdrop-filter: blur(8px);
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .logo-circle {
-      width: 50px;
-      height: 50px;
-      border-radius: 16px;
-      background: radial-gradient(circle at 30% 20%, #ffe8c2, #8b4513 70%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fdf6e3;
-      font-weight: 800;
-      font-size: 20px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-    }
-
-    .brand-text-main {
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-
-    .brand-text-sub {
-      font-size: 13px;
-      opacity: 0.9;
-    }
-
-    .tagline {
-      font-size: 11px;
-      margin-top: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      opacity: 0.8;
-    }
-
-    .header-right {
-      text-align: right;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      opacity: 0.9;
-    }
-
-    /* TOGGLE */
-
-    .mode-toggle-wrapper {
-      margin: 16px 0 4px;
-      display: flex;
-      justify-content: center;
-    }
-
-    .mode-toggle {
-      display: inline-flex;
-      padding: 4px;
-      border-radius: 999px;
-      background: rgba(15, 155, 176, 0.08);
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      backdrop-filter: blur(6px);
-    }
-
-    .mode-btn {
-      border: none;
-      background: transparent;
-      padding: 8px 16px;
-      border-radius: 999px;
-      font-size: 13px;
-      cursor: pointer;
-      color: #64748b;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.18s ease;
-    }
-
-    .mode-btn span.icon {
-      font-size: 16px;
-    }
-
-    .mode-btn.active {
-      background: #fff;
-      box-shadow: 0 8px 24px rgba(148, 163, 184, 0.35);
-      color: var(--turquoise-dark);
-      font-weight: 600;
-    }
-
-    /* CONTENT LAYOUT */
-
-    .content {
-      display: grid;
-      grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr);
-      gap: 18px;
-      margin-top: 10px;
-    }
-
-    @media (max-width: 900px) {
-      .content {
-        grid-template-columns: minmax(0, 1fr);
-      }
-    }
-
-    /* CUSTOMER SIDE */
-
-    .panel {
-      background: rgba(255, 255, 255, 0.88);
-      border-radius: 24px;
-      padding: 18px;
-      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
-      border: 1px solid rgba(148, 163, 184, 0.3);
-      backdrop-filter: blur(12px);
-    }
-
-    .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      gap: 8px;
-    }
-
-    .panel-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--coffee-dark);
-    }
-
-    .panel-sub {
-      font-size: 12px;
-      color: #64748b;
-      margin-top: 2px;
-    }
-
-    .badge {
-      font-size: 11px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: #ecfdf5;
-      color: #166534;
-      border: 1px solid #bbf7d0;
-      white-space: nowrap;
-    }
-
-    .filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-
-    .filter-pill {
-      font-size: 12px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid #cbd5e1;
-      background: #f8fafc;
-      color: #475569;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.15s ease;
-    }
-
-    .filter-pill.active {
-      background: var(--turquoise-soft);
-      border-color: var(--turquoise);
-      color: var(--turquoise-dark);
-      box-shadow: 0 0 0 1px rgba(15, 155, 176, 0.15);
-    }
-
-    .distance-note {
-      font-size: 11px;
-      color: #94a3b8;
-      margin-bottom: 6px;
-    }
-
-    /* CARDS */
-
-    .cards {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 4px;
-    }
-
-    .card {
-      display: grid;
-      grid-template-columns: 130px minmax(0, 1fr);
-      gap: 12px;
-      padding: 10px;
-      border-radius: 18px;
-      border: 1px solid var(--card-border);
-      background: #fff;
-      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
-      cursor: default;
-    }
-
-    @media (max-width: 600px) {
-      .card {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .card-photo {
-      border-radius: 15px;
-      background: linear-gradient(145deg, #0f9bb0, #115e6a);
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      align-items: flex-end;
-      padding: 10px;
-      color: #e0f2fe;
-      font-size: 12px;
-    }
-
-    .card-photo::before {
-      content: "";
-      position: absolute;
-      inset: -40%;
-      background:
-        radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.28), transparent 60%),
-        radial-gradient(circle at 80% 80%, rgba(8, 47, 73, 0.85), transparent 60%);
-      opacity: 0.65;
-    }
-
-    .card-photo-inner {
-      position: relative;
-      z-index: 1;
-    }
-
-    .card-photo-name {
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .card-photo-district {
-      font-size: 11px;
-      opacity: 0.85;
-    }
-
-    .rating-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 4px;
-      font-size: 13px;
-    }
-
-    .rating-score {
-      font-weight: 700;
-      color: var(--coffee-dark);
-    }
-
-    .price-level {
-      font-size: 14px;
-    }
-
-    .chip {
-      font-size: 11px;
-      padding: 4px 8px;
-      border-radius: 999px;
-      background: #eff6ff;
-      color: #1d4ed8;
-    }
-
-    .card-body-title {
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 2px;
-      color: #111827;
-    }
-
-    .card-body-sub {
-      font-size: 12px;
-      color: #64748b;
-      margin-bottom: 6px;
-    }
-
-    .card-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 6px;
-    }
-
-    .tag {
-      font-size: 11px;
-      padding: 3px 7px;
-      border-radius: 999px;
-      border: 1px solid #e2e8f0;
-      color: #64748b;
-      background: #f8fafc;
-    }
-
-    .card-footer-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 11px;
-      color: #94a3b8;
-    }
-
-    .btn-row {
-      display: flex;
-      gap: 6px;
-    }
-
-    .btn-sm {
-      border-radius: 999px;
-      border: 1px solid #cbd5e1;
-      background: #ffffff;
-      padding: 5px 8px;
-      font-size: 11px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.15s ease;
-    }
-
-    .btn-sm.primary {
-      border-color: var(--turquoise);
-      background: var(--turquoise);
-      color: #ecfeff;
-    }
-
-    .btn-sm:hover {
-      box-shadow: 0 4px 10px rgba(148, 163, 184, 0.45);
-      transform: translateY(-1px);
-    }
-
-    /* BUSINESS PANEL */
-
-    .business-panel {
-      display: none;
-    }
-
-    .business-panel.active {
-      display: block;
-    }
-
-    .customer-panel {
-      display: none;
-    }
-
-    .customer-panel.active {
-      display: block;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin-top: 8px;
-      margin-bottom: 10px;
-    }
-
-    @media (max-width: 600px) {
-      .form-grid {
-        grid-template-columns: minmax(0, 1fr);
-      }
-    }
-
-    .form-field {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      font-size: 12px;
-    }
-
-    .form-field label {
-      color: #475569;
-    }
-
-    .form-field input,
-    .form-field select,
-    .form-field textarea {
-      border-radius: 10px;
-      border: 1px solid #cbd5e1;
-      padding: 7px 9px;
-      font-size: 13px;
-      font-family: inherit;
-      outline: none;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
-      background: #ffffff;
-    }
-
-    .form-field textarea {
-      resize: vertical;
-      min-height: 70px;
-    }
-
-    .form-field input:focus,
-    .form-field select:focus,
-    .form-field textarea:focus {
-      border-color: var(--turquoise);
-      box-shadow: 0 0 0 1px rgba(15, 155, 176, 0.25);
-    }
-
-    .form-helper {
-      font-size: 11px;
-      color: #94a3b8;
-    }
-
-    .submit-btn {
-      margin-top: 6px;
-      width: 100%;
-      border-radius: 999px;
-      border: none;
-      padding: 9px 12px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      background: linear-gradient(135deg, var(--coffee-dark), #7c3e1a);
-      color: #fef3c7;
-      box-shadow: 0 12px 30px rgba(124, 62, 26, 0.45);
-      display: inline-flex;
-      justify-content: center;
-      gap: 6px;
-      align-items: center;
-    }
-
-    .submit-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 14px 34px rgba(124, 62, 26, 0.6);
-    }
-
-    .small-note {
-      font-size: 11px;
-      color: #94a3b8;
-      margin-top: 4px;
-    }
-
-    .tiny-title {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: #9ca3af;
-      margin-bottom: 6px;
-    }
-
-    .biz-list {
-      margin-top: 10px;
-      border-top: 1px dashed #e2e8f0;
-      padding-top: 8px;
-      max-height: 220px;
-      overflow: auto;
-    }
-
-    .biz-item {
-      font-size: 11px;
-      padding: 6px 0;
-      border-bottom: 1px dashed #e5e7eb;
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .biz-item span.name {
-      font-weight: 600;
-      color: #0f172a;
-    }
-
-    .biz-item span.district {
-      color: #64748b;
-    }
-
-    .biz-status {
-      font-size: 10px;
-      padding: 3px 7px;
-      border-radius: 999px;
-      border: 1px solid #f97316;
-      color: #9a3412;
-      background: #fff7ed;
-      white-space: nowrap;
-    }
-
-    /* FOOTER */
-
-    .footer {
-      position: fixed;
-      right: 12px;
-      bottom: 8px;
-      font-size: 10px;
-      color: #64748b;
-      opacity: 0.95;
-      background: rgba(255, 255, 255, 0.92);
-      padding: 5px 9px;
-      border-radius: 999px;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.18);
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      backdrop-filter: blur(8px);
-    }
-
-    .footer span {
-      font-weight: 600;
-      color: #0f172a;
-    }
-  </style>
-</head>
-<body>
-  <div class="app">
-    <header class="header">
-      <div class="header-left">
-        <div class="logo-circle">CB</div>
-        <div>
-          <div class="brand-text-main">COFFEE STAR</div>
-          <div class="brand-text-sub">Coffee Box™ – Bodrum Pilot</div>
-          <div class="tagline">Yakındaki kahve noktalarını keşfet</div>
-        </div>
-      </div>
-      <div class="header-right">
-        <div>POWERED BY</div>
-        <div style="font-weight:600;">TiT TECHNOLOGIES</div>
-      </div>
-    </header>
-
-    <div class="mode-toggle-wrapper">
-      <div class="mode-toggle">
-        <button class="mode-btn active" data-mode="customer">
-          <span class="icon">👤</span>
-          <span>Müşteri</span>
-        </button>
-        <button class="mode-btn" data-mode="business">
-          <span class="icon">🏪</span>
-          <span>İşletme</span>
-        </button>
-      </div>
-    </div>
-
-    <main class="content">
-      <!-- CUSTOMER PANEL -->
-      <section class="panel customer-panel active" id="customerPanel">
-        <div class="panel-header">
-          <div>
-            <div class="panel-title">Yakındaki Kahve Mekanları</div>
-            <div class="panel-sub">Bodrum Merkez, Bitez ve Turgutreis için Coffee Box listesi</div>
-          </div>
-          <div class="badge">Bodrum Coffee Box • Pilot</div>
-        </div>
-
-        <div class="filters">
-          <button class="filter-pill active" data-district="all">Tüm bölgeler</button>
-          <button class="filter-pill" data-district="Bodrum Merkez">Bodrum Merkez</button>
-          <button class="filter-pill" data-district="Bitez">Bitez</button>
-          <button class="filter-pill" data-district="Turgutreis">Turgutreis</button>
-        </div>
-
-        <p class="distance-note" id="distanceNote">
-          📍 Konum izni verirsen, mekanlar sana en yakın olandan başlayarak sıralanır.
-        </p>
-
-        <div class="cards" id="venueList"></div>
-      </section>
-
-      <!-- BUSINESS PANEL -->
-      <section class="panel business-panel" id="businessPanel">
-        <div class="panel-header">
-          <div>
-            <div class="panel-title">Coffee Box • İşletme Üyelik Başvurusu</div>
-            <div class="panel-sub">Bodrum’daki kahve odaklı mekanları pilot ağa dahil ediyoruz.</div>
-          </div>
-          <div class="badge">TiT Technologies Programı</div>
-        </div>
-
-        <p class="small-note">
-          Formu doldurduğunuzda ekibinizle iletişime geçilecek. Bu sürümde veriler yalnızca cihazınızda saklanır (demo).
-        </p>
-
-        <form id="businessForm">
-          <div class="form-grid">
-            <div class="form-field">
-              <label>İşletme Adı *</label>
-              <input type="text" name="name" required placeholder="Örn: Seaside Brew Bodrum" />
-            </div>
-            <div class="form-field">
-              <label>Bölge / İlçe *</label>
-              <select name="district" required>
-                <option value="">Seçiniz</option>
-                <option value="Bodrum Merkez">Bodrum Merkez</option>
-                <option value="Bitez">Bitez</option>
-                <option value="Turgutreis">Turgutreis</option>
-              </select>
-            </div>
-            <div class="form-field">
-              <label>Adres</label>
-              <input type="text" name="address" placeholder="Sokak, cadde, mevki" />
-            </div>
-            <div class="form-field">
-              <label>Yetkili İsim</label>
-              <input type="text" name="contactName" placeholder="İşletme sahibi / yönetici" />
-            </div>
-            <div class="form-field">
-              <label>Telefon</label>
-              <input type="tel" name="phone" placeholder="+90 ..." />
-            </div>
-            <div class="form-field">
-              <label>E-posta</label>
-              <input type="email" name="email" placeholder="ornek@coffeebox.com" />
-            </div>
-          </div>
-
-          <div class="form-field">
-            <label>Konsept ve kahve yaklaşımınız</label>
-            <textarea name="concept" placeholder="3. dalga, single origin, espresso bar, nitelikli filtre, vb."></textarea>
-            <div class="form-helper">
-              Kısa şekilde anlatabilirsiniz; ekip bunu referans alacak.
-            </div>
-          </div>
-
-          <div class="form-grid">
-            <div class="form-field">
-              <label>Fiyat Seviyesi (Genel)</label>
-              <select name="priceLevel">
-                <option value="">Seçiniz</option>
-                <option value="1">☕ Uygun</option>
-                <option value="2">☕☕ Orta</option>
-                <option value="3">☕☕☕ Premium</option>
-                <option value="4">☕☕☕☕ Lüks / manzaralı</option>
-              </select>
-            </div>
-            <div class="form-field">
-              <label>Çalışma Alanı / Wi-Fi</label>
-              <select name="workWifi">
-                <option value="">Seçiniz</option>
-                <option value="Yok">Standart oturma alanı</option>
-                <option value="Var">Laptop ile çalışmaya uygun & güçlü Wi-Fi</option>
-              </select>
-            </div>
-          </div>
-
-          <button type="submit" class="submit-btn">
-            Başvuruyu Gönder
-            <span>→</span>
-          </button>
-          <p class="small-note">
-            Bu sürümde başvurular cihazına kaydedilir. Gerçek sistemde TiT Technologies ekibine ve admin panele düşecektir.
-          </p>
-        </form>
-
-        <div class="biz-list" id="bizList">
-          <div class="tiny-title">Bu cihazdan yapılan başvurular (demo)</div>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <div class="footer">
-    <span>TiT</span> Technologies • Coffee Box Bodrum Pilot
-  </div>
-
-  <script>
-
-    // --- STATE & DOM ---
-
-    const venueList = document.getElementById("venueList");
-    const filterButtons = document.querySelectorAll(".filter-pill");
-    const distanceNote = document.getElementById("distanceNote");
-    const modeButtons = document.querySelectorAll(".mode-btn");
-    const customerPanel = document.getElementById("customerPanel");
-    const businessPanel = document.getElementById("businessPanel");
-    const bizForm = document.getElementById("businessForm");
-    const bizList = document.getElementById("bizList");
-
-    let activeDistrict = "all";
-
-    // --- RENDER FUNCTIONS ---
-
-    function renderVenues() {
-      let filtered = venues.slice();
-
-      if (activeDistrict !== "all") {
-        filtered = filtered.filter(v => v.district === activeDistrict);
-      }
-
-      filtered.sort((a, b) => a.approxDistance - b.approxDistance || b.rating - a.rating);
-
-      venueList.innerHTML = "";
-
-      filtered.forEach(v => {
-        const card = document.createElement("article");
-        card.className = "card";
-
-        const photo = document.createElement("div");
-        photo.className = "card-photo";
-        photo.innerHTML = `
-          <div class="card-photo-inner">
-            <div class="card-photo-name">${v.name}</div>
-            <div class="card-photo-district">${v.district}</div>
-          </div>
-        `;
-
-        const body = document.createElement("div");
-
-        const ratingRow = document.createElement("div");
-        ratingRow.className = "rating-row";
-        ratingRow.innerHTML = `
-          <span class="rating-score">⭐ ${v.rating.toFixed(1)}</span>
-          <span>${v.votes} oy</span>
-          <span class="price-level">${"☕".repeat(v.priceLevel)}</span>
-        `;
-
-        const title = document.createElement("div");
-        title.className = "card-body-title";
-        title.textContent = v.name;
-
-        const sub = document.createElement("div");
-        sub.className = "card-body-sub";
-        sub.textContent = v.notes;
-
-        const tagsRow = document.createElement("div");
-        tagsRow.className = "card-tags";
-        v.tags.forEach(t => {
-          const tag = document.createElement("span");
-          tag.className = "tag";
-          tag.textContent = t;
-          tagsRow.appendChild(tag);
-        });
-
-        const footerRow = document.createElement("div");
-        footerRow.className = "card-footer-row";
-
-        const leftFoot = document.createElement("div");
-        leftFoot.textContent = `${v.district} • ~${v.approxDistance.toFixed(1)} km tahmini mesafe`;
-
-        const btnRow = document.createElement("div");
-        btnRow.className = "btn-row";
-        const btnDetail = document.createElement("button");
-        btnDetail.className = "btn-sm";
-        btnDetail.textContent = "Detay / Yorum";
-        btnDetail.onclick = () => {
-          alert(
-            `${v.name}\n\nPuan: ${v.rating.toFixed(1)} (${v.votes} oy)\nBölge: ${v.district}\nFiyat: ${"☕".repeat(v.priceLevel)}\n\nNot: ${v.notes}\n\nBu sürüm demo. Gerçek yorum sistemi Supabase / backend ile devreye alınacak.`
-          );
-        };
-
-        const btnRate = document.createElement("button");
-        btnRate.className = "btn-sm primary";
-        btnRate.textContent = "Puan Ver";
-        btnRate.onclick = () => {
-          alert(
-            `${v.name} için puan verme ekranı (demo).\n\nGerçek sistemde kullanıcı login + rating / yorum akışı açılacak.`
-          );
-        };
-
-        btnRow.appendChild(btnDetail);
-        btnRow.appendChild(btnRate);
-
-        footerRow.appendChild(leftFoot);
-        footerRow.appendChild(btnRow);
-
-        body.appendChild(ratingRow);
-        body.appendChild(title);
-        body.appendChild(sub);
-        body.appendChild(tagsRow);
-        body.appendChild(footerRow);
-
-        card.appendChild(photo);
-        card.appendChild(body);
-
-        venueList.appendChild(card);
-      });
-    }
-
-    // --- FILTER HANDLERS ---
-
-    filterButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        filterButtons.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        activeDistrict = btn.dataset.district;
-        renderVenues();
-      });
-    });
-
-    // --- MODE TOGGLE ---
-
-    modeButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        modeButtons.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-
-        const mode = btn.dataset.mode;
-        if (mode === "customer") {
-          customerPanel.classList.add("active");
-          businessPanel.classList.remove("active");
-        } else {
-          customerPanel.classList.remove("active");
-          businessPanel.classList.add("active");
-        }
-      });
-    });
-
-    // --- BUSINESS FORM (LOCAL DEMO) ---
-
-    function loadBizFromStorage() {
-      const raw = localStorage.getItem("coffeeBoxBiz");
-      const all = raw ? JSON.parse(raw) : [];
-      bizList.innerHTML = '<div class="tiny-title">Bu cihazdan yapılan başvurular (demo)</div>';
-
-      all.forEach(item => {
-        const row = document.createElement("div");
-        row.className = "biz-item";
-        row.innerHTML = `
-          <div>
-            <span class="name">${item.name}</span>
-            <span class="district"> • ${item.district}</span>
-          </div>
-          <div class="biz-status">Beklemede (demo)</div>
-        `;
-        bizList.appendChild(row);
-      });
-    }
-
-    bizForm.addEventListener("submit", e => {
-      e.preventDefault();
-      const formData = new FormData(bizForm);
-      const biz = {
-        name: formData.get("name") || "",
-        district: formData.get("district") || "",
-        ts: Date.now()
-      };
-
-      if (!biz.name || !biz.district) {
-        alert("Lütfen işletme adı ve bölge alanlarını doldurunuz.");
-        return;
-      }
-
-      const raw = localStorage.getItem("coffeeBoxBiz");
-      const all = raw ? JSON.parse(raw) : [];
-      all.push(biz);
-      localStorage.setItem("coffeeBoxBiz", JSON.stringify(all));
-
-      alert("Başvurunuz demo ortamında kaydedildi. Gerçek sistemde TiT Technologies ekibine iletilecek.");
-      bizForm.reset();
-      loadBizFromStorage();
-    });
-
-    // --- GEOLOCATION (OPSİYONEL) ---
-
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        () => {
-          distanceNote.textContent =
-            "📍 Konum izni aktif. Bu demo sürümde yaklaşık mesafe sabit, gerçek sistemde gerçek lokasyona göre sıralanacaktır.";
-        },
-        () => {
-          distanceNote.textContent =
-            "📍 Konum izni verilmedi. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.";
-        }
-      );
-    } else {
-      distanceNote.textContent =
-        "📍 Tarayıcınız konum desteği sunmuyor. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.";
-    }
-
-    // --- INIT ---
-
-    loadBizFromStorage();
-  </script>
-</body>
-</html>
 <script>
-  // Supabase ayarları
-  const supabaseUrl = 'https://girurtvcbudkjrvfjdte.supabase.co';
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpcnVydHZjYnVka2pydmZqZHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzMDA1ODksImV4cCI6MjA3ODg3NjU4OX0.n2Q9bvirUMIFgH1l4G7prZHCvr1wxwzrSGZw9OCUJ9A';
+  // --- SUPABASE AYARLARI ---
+  const supabaseUrl = 'https://giurtvcbubdkjrvfjdtc.supabase.co';
+  const supabaseKey =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpdXJ0dmNidWJka2pydmZqZHRjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE3OTcyMDAsImV4cCI6MjA0NzM3MzIwMH0._YsmW3YV_6Q6c4QbQZGYBtsBv88s3W0S5tRcIP_bZ5Y';
 
-  // CDN'den gelen global supabase objesinden createClient'i al
   const { createClient } = window.supabase;
   const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
-  // Supabase'ten venues tablosunu oku
-  async function loadVenues() {
-    const { data, error } = await supabaseClient
-      .from('venues')
-      .select('*')
-      .order('id', { ascending: true });
+  // --- STATE & DOM ---
 
-    if (error) {
-      console.error('Supabase error:', error);
-      return;
-    }
+  // Supabase'ten gelen verileri burada tutacağız
+  let venues = [];
 
-    console.log('Supabase Data:', data);
-    renderVenueCards(data);
+  const venueList = document.getElementById('venueList');
+  const filterButtons = document.querySelectorAll('.filter-pill');
+  const distanceNote = document.getElementById('distanceNote');
+  const modeButtons = document.querySelectorAll('.mode-btn');
+  const customerPanel = document.getElementById('customerPanel');
+  const businessPanel = document.getElementById('businessPanel');
+  const bizForm = document.getElementById('businessForm');
+  const bizList = document.getElementById('bizList');
+
+  let activeDistrict = 'all';
+
+  // --- SUPABASE --> JS FORMAT ÇEVİRİCİ ---
+
+  function mapRowToVenue(row) {
+    return {
+      id: row.id,
+      name: row.name,
+      district: row.district || 'Bodrum Merkez',
+      rating: typeof row.rating === 'number' ? row.rating : 0,
+      votes: typeof row.votes === 'number' ? row.votes : 0,
+      priceLevel:
+        row.pricelevel ??
+        row.price_level ??
+        row.price ??
+        2, // kolon ismi farklarına tolerans
+      tags: row.tags ?? [],
+      notes: row.notes || row.description || '',
+      wifi: row.wifi || '',
+      approxDistance: row.approx_distance ?? row.distance_km ?? 0
+    };
   }
 
-  function renderVenueCards(data) {
-    // Önce .venue-list var mı diye bak
-    let venueList = document.querySelector('.venue-list');
+  // --- RENDER FONKSİYONU ---
 
-    // Yoksa, ilk .venue-card'ın parent'ını kullan
-    if (!venueList) {
-      const firstCard = document.querySelector('.venue-card');
-      if (firstCard && firstCard.parentElement) {
-        venueList = firstCard.parentElement;
-      } else {
-        // O da yoksa, body içine yeni bir container oluştur
-        venueList = document.createElement('div');
-        venueList.className = 'venue-list';
-        document.body.appendChild(venueList);
-      }
+  function renderVenues(dataOverride) {
+    const data = dataOverride || venues;
+
+    if (!venueList) return;
+
+    // Filtre: aktif bölge
+    let filtered = data;
+    if (activeDistrict !== 'all') {
+      filtered = data.filter(v => v.district === activeDistrict);
     }
 
-    // Eski içeriği temizle
     venueList.innerHTML = '';
 
-    // Supabase'ten gelen her venue için kart oluştur
-    data.forEach((venue) => {
-      const div = document.createElement('div');
-      div.className = 'venue-card';
-      div.innerHTML = `
-        <div class="venue-card-header">
-          <h3>${venue.name}</h3>
-          <div class="venue-info">${venue.district || ''}</div>
-        </div>
-        <div class="venue-card-body">
-          <p>${venue.notes || ''}</p>
-        </div>
-        <div class="venue-card-footer">
-          <button>Detay / Yorum</button>
-          <button>Puan Ver</button>
-        </div>
-      `;
-      venueList.appendChild(div);
+    filtered.forEach(v => {
+      const card = document.createElement('div');
+      card.className = 'venue-card';
+
+      const header = document.createElement('div');
+      header.className = 'venue-card-header';
+
+      const h3 = document.createElement('h3');
+      h3.textContent = v.name;
+
+      const info = document.createElement('div');
+      info.className = 'venue-info';
+      info.textContent = v.district || '';
+
+      header.appendChild(h3);
+      header.appendChild(info);
+
+      const body = document.createElement('div');
+      body.className = 'venue-card-body';
+
+      const p = document.createElement('p');
+      p.textContent = v.notes || '';
+      body.appendChild(p);
+
+      const footer = document.createElement('div');
+      footer.className = 'venue-card-footer';
+
+      const btnRow = document.createElement('div');
+      btnRow.className = 'btn-row';
+
+      const btnDetail = document.createElement('button');
+      btnDetail.className = 'btn-sm';
+      btnDetail.textContent = 'Detay / Yorum';
+      btnDetail.onclick = () => {
+        alert(
+          `${v.name}\n\nPuan: ${v.rating?.toFixed?.(1) || '0.0'} (${v.votes} oy)\n` +
+            `Bölge: ${v.district}\n` +
+            `Fiyat: ${'☕'.repeat(v.priceLevel || 1)}\n\n` +
+            `Not: ${v.notes || '-'}`
+        );
+      };
+
+      const btnRate = document.createElement('button');
+      btnRate.className = 'btn-sm primary';
+      btnRate.textContent = 'Puan Ver';
+      btnRate.onclick = () => {
+        alert(
+          `${v.name} için puan verme ekranı (demo).\n\nGerçek sistemde kullanıcı login + rating / yorum akışı açılacak.`
+        );
+      };
+
+      btnRow.appendChild(btnDetail);
+      btnRow.appendChild(btnRate);
+      footer.appendChild(btnRow);
+
+      card.appendChild(header);
+      card.appendChild(body);
+      card.appendChild(footer);
+
+      venueList.appendChild(card);
     });
   }
 
-  // Sayfa açılınca Supabase'ten verileri çek
+  // --- SUPABASE'TEN VERİ ÇEKME ---
+
+  async function loadVenues() {
+    try {
+      const { data, error } = await supabaseClient.from('venues').select('*');
+
+      if (error) {
+        console.error('Supabase error:', error);
+        return;
+      }
+
+      console.log('Supabase Data:', data);
+
+      venues = (data || []).map(mapRowToVenue);
+      renderVenues(); // ilk çizim
+    } catch (err) {
+      console.error('loadVenues exception:', err);
+    }
+  }
+
+  // --- FİLTRE BUTONLARI ---
+
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeDistrict = btn.dataset.district || 'all';
+      renderVenues();
+    });
+  });
+
+  // --- MOD (MÜŞTERİ / İŞLETME) BUTONLARI ---
+
+  modeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      modeButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const mode = btn.dataset.mode;
+      if (mode === 'customer') {
+        customerPanel.classList.add('active');
+        businessPanel.classList.remove('active');
+      } else {
+        customerPanel.classList.remove('active');
+        businessPanel.classList.add('active');
+      }
+    });
+  });
+
+  // --- DEMO İŞLETME BAŞVURU FORMU (mevcut kodların korunması için basit placeholder) ---
+
+  if (bizForm) {
+    bizForm.addEventListener('submit', e => {
+      e.preventDefault();
+      alert(
+        'Demo sürüm: İşletme başvurunuz alındı gibi davranıyoruz 😊\nGerçek sistemde bu form Supabase’e kaydedilecek.'
+      );
+      bizForm.reset();
+    });
+  }
+
+  // --- GEOLOCATION NOTU (mevcut metni koruyoruz) ---
+
+  if ('geolocation' in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        distanceNote.textContent =
+          '📍 Konum izni aktif. Bu demo sürümde yaklaşık mesafe sabit, gerçek sistemde gerçek lokasyona göre sıralanacaktır.';
+      },
+      () => {
+        distanceNote.textContent =
+          '📍 Konum izni verilmedi. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.';
+      }
+    );
+  } else {
+    distanceNote.textContent =
+      '📍 Tarayıcınız konum desteği sunmuyor. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.';
+  }
+
+  // --- INIT ---
+
   loadVenues();
 </script>
-
