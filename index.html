@@ -1012,12 +1012,44 @@
   const { createClient } = window.supabase;
   const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
-  // Test: venues tablosundan verileri çek
+  // venues tablosundan verileri çek
   async function loadVenues() {
     const { data, error } = await supabaseClient.from('venues').select('*');
     console.log('Supabase Data:', data);
-    if (error) console.error('Supabase error:', error);
+    if (error) {
+      console.error('Supabase error:', error);
+      return;
+    }
+
+    // ✅ Artık veri geldiyse burada kartları çiziyoruz
+    renderVenueCards(data);
   }
 
+  function renderVenueCards(data) {
+    const venueList = document.querySelector('.venue-list');
+    venueList.innerHTML = ''; // Eski statik kartları temizle
+
+    data.forEach((venue) => {
+      const div = document.createElement('div');
+      div.className = 'venue-card';
+      div.innerHTML = `
+        <div class="venue-card-header">
+          <h3>${venue.name}</h3>
+          <div class="venue-info">${venue.district || ''}</div>
+        </div>
+        <div class="venue-card-body">
+          <p>${venue.notes || ''}</p>
+        </div>
+        <div class="venue-card-footer">
+          <button>Detay / Yorum</button>
+          <button>Puan Ver</button>
+        </div>
+      `;
+      venueList.appendChild(div);
+    });
+  }
+
+  // Sayfa açılınca Supabase'ten verileri çek
   loadVenues();
 </script>
+
