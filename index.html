@@ -2,422 +2,585 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>Coffee Star – Değerlendirme & Üyelik MVP</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coffee Star • Coffee Box – Bodrum Pilot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
-      --bg: #f7f1e8;
-      --card: #ffffff;
-      --accent: #c27b41;
-      --accent-dark: #8a4d24;
-      --accent-soft: #f3d3a1;
+      --turquoise: #11b5c8;
+      --turquoise-dark: #0b7f8e;
+      --turquoise-soft: #e0f7fa;
+      --coffee-dark: #4b2e19;
+      --coffee-soft: #f4ece3;
       --text-main: #1f2933;
-      --text-muted: #6b7280;
-      --border: #e5e7eb;
-      --danger: #dc2626;
-      --success: #16a34a;
+      --card-border: #cbd5e1;
+      --bg: #f1f5f9;
+      --accent: #f97316;
     }
-    * { box-sizing: border-box; }
-    body {
+
+    * {
+      box-sizing: border-box;
       margin: 0;
+      padding: 0;
+    }
+
+    body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(227, 171, 93, 0.18), transparent 45%),
-        radial-gradient(circle at bottom right, rgba(90, 56, 32, 0.18), transparent 45%),
-        var(--bg);
+      background: radial-gradient(circle at top, #e0fbff 0, #f8fafc 50%, #eef2ff 100%);
       color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      backdrop-filter: blur(10px);
-      background: rgba(247,241,232,0.92);
-      border-bottom: 1px solid rgba(229,231,235,0.7);
-    }
-    .header-inner {
-      max-width: 1000px;
+
+    .app {
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 0.7rem 1rem;
+      padding: 16px;
+      padding-bottom: 64px;
+    }
+
+    /* HEADER */
+
+    .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 1rem;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--turquoise), #0f9bb0);
+      color: #fff;
+      box-shadow: 0 18px 40px rgba(15, 155, 176, 0.35);
+      position: sticky;
+      top: 12px;
+      z-index: 10;
+      backdrop-filter: blur(8px);
     }
-    .brand {
+
+    .header-left {
       display: flex;
       align-items: center;
-      gap: 0.7rem;
+      gap: 14px;
     }
-    .brand-logo {
-      width: 40px;
-      height: 40px;
-      border-radius: 999px;
-      background:
-        radial-gradient(circle at 25% 20%, #fdf2d8, transparent 55%),
-        radial-gradient(circle at 75% 80%, #5b3319, #2b150a);
+
+    .logo-circle {
+      width: 50px;
+      height: 50px;
+      border-radius: 16px;
+      background: radial-gradient(circle at 30% 20%, #ffe8c2, #8b4513 70%);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fef3c7;
-      font-weight: 900;
-      font-size: 0.95rem;
-      box-shadow: 0 8px 18px rgba(15,23,42,0.28);
-      position: relative;
-      overflow: hidden;
-    }
-    .brand-logo::before {
-      content: "";
-      position: absolute;
-      width: 130%;
-      height: 130%;
-      background-image:
-        radial-gradient(circle at 20% 20%, rgba(0,0,0,0.14) 0, transparent 45%),
-        radial-gradient(circle at 70% 70%, rgba(0,0,0,0.22) 0, transparent 55%);
-      mix-blend-mode: multiply;
-      opacity: 0.85;
-    }
-    .brand-logo span {
-      position: relative;
-      z-index: 2;
-      letter-spacing: 0.04em;
-    }
-    .brand-text-title {
+      color: #fdf6e3;
       font-weight: 800;
-      letter-spacing: 0.08em;
-      font-size: 0.95rem;
+      font-size: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .brand-text-main {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
     }
+
     .brand-text-sub {
-      font-size: 0.78rem;
-      color: var(--text-muted);
+      font-size: 13px;
+      opacity: 0.9;
     }
+
+    .tagline {
+      font-size: 11px;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      opacity: 0.8;
+    }
+
+    .header-right {
+      text-align: right;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      opacity: 0.9;
+    }
+
+    /* TOGGLE */
+
+    .mode-toggle-wrapper {
+      margin: 16px 0 4px;
+      display: flex;
+      justify-content: center;
+    }
+
     .mode-toggle {
       display: inline-flex;
-      padding: 0.2rem;
-      background: #fff;
+      padding: 4px;
       border-radius: 999px;
-      border: 1px solid rgba(229,231,235,0.9);
-      box-shadow: 0 4px 12px rgba(15,23,42,0.12);
+      background: rgba(15, 155, 176, 0.08);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      backdrop-filter: blur(6px);
     }
+
     .mode-btn {
       border: none;
       background: transparent;
+      padding: 8px 16px;
       border-radius: 999px;
-      padding: 0.45rem 1rem;
-      font-size: 0.8rem;
+      font-size: 13px;
       cursor: pointer;
-      display: inline-flex;
+      color: #64748b;
+      display: flex;
       align-items: center;
-      gap: 0.3rem;
-      color: var(--text-muted);
+      gap: 6px;
+      transition: all 0.18s ease;
     }
+
     .mode-btn span.icon {
-      font-size: 1.05rem;
+      font-size: 16px;
     }
+
     .mode-btn.active {
-      background: linear-gradient(135deg, #c27b41, #5b3319);
-      color: #fff;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.25);
-    }
-
-    main {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 1rem;
-      padding-bottom: 3rem;
-    }
-
-    .section-title {
-      font-size: 1.25rem;
-      font-weight: 750;
-      margin-bottom: 0.15rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-    .section-title::after {
-      content: "";
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(90deg, rgba(194,123,65,0.45), transparent);
-      max-width: 160px;
-    }
-    .section-sub {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 1rem;
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: 1.2rem;
-      border: 1px solid rgba(229,231,235,0.95);
-      box-shadow: 0 16px 40px rgba(15,23,42,0.08);
-      padding: 1rem;
-    }
-
-    .shop-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 0.9rem;
-    }
-    .shop-card {
-      border-radius: 1rem;
-      border: 1px solid var(--border);
-      padding: 0.9rem;
-      background:
-        radial-gradient(circle at top left, rgba(244,220,186,0.9), transparent 50%),
-        linear-gradient(145deg,#ffffff,#fdf8f3);
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .shop-card::before {
-      content: "";
-      position: absolute;
-      width: 80px;
-      height: 80px;
-      right: -20px;
-      bottom: -20px;
-      border-radius: 50% 50% 10% 50%;
-      background: radial-gradient(circle at 30% 30%, #4b2712, #1f0f07);
-      opacity: 0.12;
-    }
-    .shop-tag {
-      position: absolute;
-      top: 0.6rem;
-      right: 0.6rem;
-      background: rgba(24,24,27,0.82);
-      color: #fff;
-      font-size: 0.7rem;
-      padding: 0.2rem 0.6rem;
-      border-radius: 999px;
-    }
-    .shop-name {
-      font-weight: 720;
-      font-size: 1rem;
-      margin-bottom: 0.1rem;
-    }
-    .shop-location {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
-    .shop-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 0.8rem;
-      margin-top: 0.2rem;
-    }
-    .pill {
-      font-size: 0.7rem;
-      padding: 0.1rem 0.5rem;
-      border-radius: 999px;
-      border: 1px solid rgba(209,213,219,0.9);
-      background: rgba(249,250,251,0.9);
-    }
-    .rating-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.2rem;
-      font-size: 0.78rem;
-      padding: 0.1rem 0.6rem;
-      border-radius: 999px;
-      background: rgba(234,179,8,0.12);
-      color: #92400e;
-    }
-    .shop-actions {
-      margin-top: 0.5rem;
-      display: flex;
-      justify-content: space-between;
-      gap: 0.5rem;
-    }
-    .btn {
-      border-radius: 999px;
-      border: none;
-      font-size: 0.78rem;
-      padding: 0.35rem 0.7rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      justify-content: center;
-      white-space: nowrap;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg,#c27b41,#5b3319);
-      color: #fff;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.16);
-    }
-    .btn-outline {
       background: #fff;
-      color: var(--text-main);
-      border: 1px solid var(--border);
-    }
-
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.3rem;
-      margin-top: 0.3rem;
-    }
-    .chip {
-      border-radius: 999px;
-      border: 1px solid rgba(209,213,219,0.9);
-      font-size: 0.7rem;
-      padding: 0.1rem 0.5rem;
-      background: rgba(243,244,246,0.9);
-    }
-
-    .badge {
-      font-size: 0.7rem;
-      padding: 0.1rem 0.45rem;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.2rem;
-    }
-    .badge-star {
-      background: rgba(234,179,8,0.14);
-      color: #92400e;
-    }
-    .badge-wifi {
-      background: rgba(59,130,246,0.1);
-      color: #1d4ed8;
-    }
-    .badge-laptop {
-      background: rgba(34,197,94,0.11);
-      color: #15803d;
-    }
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(15,23,42,0.6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.75rem;
-      z-index: 20;
-    }
-    .modal {
-      background: #fff;
-      border-radius: 1.2rem;
-      max-width: 480px;
-      width: 100%;
-      max-height: 90vh;
-      overflow: auto;
-      box-shadow: 0 20px 60px rgba(15,23,42,0.4);
-      padding: 1rem 1.1rem 1.25rem;
-      animation: pop 0.2s ease-out;
-    }
-    @keyframes pop {
-      from { transform: translateY(10px) scale(0.96); opacity: 0; }
-      to { transform: translateY(0) scale(1); opacity: 1; }
-    }
-
-    .form-group {
-      margin-bottom: 0.55rem;
-    }
-    label {
-      display: block;
-      font-size: 0.78rem;
-      margin-bottom: 0.18rem;
-      color: var(--text-main);
-    }
-    input[type="text"],
-    input[type="tel"],
-    input[type="email"],
-    textarea,
-    select {
-      width: 100%;
-      border-radius: 0.7rem;
-      border: 1px solid var(--border);
-      padding: 0.35rem 0.6rem;
-      font-size: 0.8rem;
-      font-family: inherit;
-    }
-    textarea { resize: vertical; min-height: 70px; }
-
-    .alert {
-      font-size: 0.76rem;
-      padding: 0.4rem 0.6rem;
-      border-radius: 0.6rem;
-      margin-top: 0.2rem;
-    }
-    .alert-success {
-      background: rgba(22,163,74,0.06);
-      color: #166534;
-      border: 1    px solid rgba(22,163,74,0.2);
-    }
-    .alert-error {
-      background: rgba(220,38,38,0.06);
-      color: #b91c1c;
-      border: 1px solid rgba(220,38,38,0.25);
-    }
-
-    .business-layout {
-      display: grid;
-      gap: 1rem;
-    }
-    @media (min-width: 800px) {
-      .business-layout {
-        grid-template-columns: 1.3fr 1fr;
-        align-items: flex-start;
-      }
-    }
-    .stat-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.8rem;
-      margin-top: 0.15rem;
-    }
-    .stat-label {
-      color: var(--text-muted);
-    }
-    .stat-value {
+      box-shadow: 0 8px 24px rgba(148, 163, 184, 0.35);
+      color: var(--turquoise-dark);
       font-weight: 600;
     }
 
-    .badge-status {
-      font-size: 0.7rem;
-      padding: 0.2rem 0.55rem;
+    /* CONTENT LAYOUT */
+
+    .content {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr);
+      gap: 18px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 900px) {
+      .content {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    /* CUSTOMER SIDE */
+
+    .panel {
+      background: rgba(255, 255, 255, 0.88);
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      backdrop-filter: blur(12px);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 8px;
+    }
+
+    .panel-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--coffee-dark);
+    }
+
+    .panel-sub {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 4px 10px;
       border-radius: 999px;
-      background: rgba(59,130,246,0.1);
+      background: #ecfdf5;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+      white-space: nowrap;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .filter-pill {
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #475569;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .filter-pill.active {
+      background: var(--turquoise-soft);
+      border-color: var(--turquoise);
+      color: var(--turquoise-dark);
+      box-shadow: 0 0 0 1px rgba(15, 155, 176, 0.15);
+    }
+
+    .distance-note {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+
+    /* CARDS */
+
+    .cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .card {
+      display: grid;
+      grid-template-columns: 130px minmax(0, 1fr);
+      gap: 12px;
+      padding: 10px;
+      border-radius: 18px;
+      border: 1px solid var(--card-border);
+      background: #fff;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+      cursor: default;
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card-photo {
+      border-radius: 15px;
+      background: linear-gradient(145deg, #0f9bb0, #115e6a);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+      padding: 10px;
+      color: #e0f2fe;
+      font-size: 12px;
+    }
+
+    .card-photo::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.28), transparent 60%),
+        radial-gradient(circle at 80% 80%, rgba(8, 47, 73, 0.85), transparent 60%);
+      opacity: 0.65;
+    }
+
+    .card-photo-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-photo-name {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .card-photo-district {
+      font-size: 11px;
+      opacity: 0.85;
+    }
+
+    .rating-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .rating-score {
+      font-weight: 700;
+      color: var(--coffee-dark);
+    }
+
+    .price-level {
+      font-size: 14px;
+    }
+
+    .chip {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #eff6ff;
       color: #1d4ed8;
     }
 
-    footer {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 0 1rem 1rem;
-      font-size: 0.72rem;
-      color: var(--text-muted);
+    .card-body-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 2px;
+      color: #111827;
     }
 
-    .link {
-      color: var(--accent-dark);
-      text-decoration: underline;
+    .card-body-sub {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 6px;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .tag {
+      font-size: 11px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      border: 1px solid #e2e8f0;
+      color: #64748b;
+      background: #f8fafc;
+    }
+
+    .card-footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-sm {
+      border-radius: 999px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      padding: 5px 8px;
+      font-size: 11px;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
     }
 
+    .btn-sm.primary {
+      border-color: var(--turquoise);
+      background: var(--turquoise);
+      color: #ecfeff;
+    }
+
+    .btn-sm:hover {
+      box-shadow: 0 4px 10px rgba(148, 163, 184, 0.45);
+      transform: translateY(-1px);
+    }
+
+    /* BUSINESS PANEL */
+
+    .business-panel {
+      display: none;
+    }
+
+    .business-panel.active {
+      display: block;
+    }
+
+    .customer-panel {
+      display: none;
+    }
+
+    .customer-panel.active {
+      display: block;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .form-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 12px;
+    }
+
+    .form-field label {
+      color: #475569;
+    }
+
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      padding: 7px 9px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      background: #ffffff;
+    }
+
+    .form-field textarea {
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field textarea:focus {
+      border-color: var(--turquoise);
+      box-shadow: 0 0 0 1px rgba(15, 155, 176, 0.25);
+    }
+
+    .form-helper {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .submit-btn {
+      margin-top: 6px;
+      width: 100%;
+      border-radius: 999px;
+      border: none;
+      padding: 9px 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--coffee-dark), #7c3e1a);
+      color: #fef3c7;
+      box-shadow: 0 12px 30px rgba(124, 62, 26, 0.45);
+      display: inline-flex;
+      justify-content: center;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 34px rgba(124, 62, 26, 0.6);
+    }
+
+    .small-note {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .tiny-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #9ca3af;
+      margin-bottom: 6px;
+    }
+
+    .biz-list {
+      margin-top: 10px;
+      border-top: 1px dashed #e2e8f0;
+      padding-top: 8px;
+      max-height: 220px;
+      overflow: auto;
+    }
+
+    .biz-item {
+      font-size: 11px;
+      padding: 6px 0;
+      border-bottom: 1px dashed #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .biz-item span.name {
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .biz-item span.district {
+      color: #64748b;
+    }
+
+    .biz-status {
+      font-size: 10px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      border: 1px solid #f97316;
+      color: #9a3412;
+      background: #fff7ed;
+      white-space: nowrap;
+    }
+
+    /* FOOTER */
+
+    .footer {
+      position: fixed;
+      right: 12px;
+      bottom: 8px;
+      font-size: 10px;
+      color: #64748b;
+      opacity: 0.95;
+      background: rgba(255, 255, 255, 0.92);
+      padding: 5px 9px;
+      border-radius: 999px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.18);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      backdrop-filter: blur(8px);
+    }
+
+    .footer span {
+      font-weight: 600;
+      color: #0f172a;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <div class="header-inner">
-      <div class="brand">
-        <div class="brand-logo">
-          <span>CS</span>
-        </div>
+  <div class="app">
+    <header class="header">
+      <div class="header-left">
+        <div class="logo-circle">CB</div>
         <div>
-          <div class="brand-text-title">Coffee Star</div>
-          <div class="brand-text-sub">Türkiye & Balkanlar için kahve mekânı puanlama</div>
+          <div class="brand-text-main">COFFEE STAR</div>
+          <div class="brand-text-sub">Coffee Box™ – Bodrum Pilot</div>
+          <div class="tagline">Yakındaki kahve noktalarını keşfet</div>
         </div>
       </div>
+      <div class="header-right">
+        <div>POWERED BY</div>
+        <div style="font-weight:600;">TiT TECHNOLOGIES</div>
+      </div>
+    </header>
+
+    <div class="mode-toggle-wrapper">
       <div class="mode-toggle">
         <button class="mode-btn active" data-mode="customer">
           <span class="icon">👤</span>
@@ -429,526 +592,413 @@
         </button>
       </div>
     </div>
-  </header>
 
-  <main>
-    <section id="customer-section">
-      <div class="section-title">Yakındaki Coffee Star mekânlarını keşfet</div>
-      <div class="section-sub">
-        Coffee Star ile Türkiye’deki kahve barlarını ve kafeleri puanla, yorum bırak, favorilerini oluştur.
-        İkinci aşamada Balkan ülkeleri sisteme eklenecek. Bu MVP sürümü tamamen tarayıcında çalışır
-        (veriler sadece bu cihazda saklanır).
-      </div>
-
-      <div class="card" style="margin-bottom:0.9rem;">
-        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;justify-content:space-between;">
-          <div style="font-size:0.8rem;color:var(--text-muted);">
-            Filtrele:
+    <main class="content">
+      <!-- CUSTOMER PANEL -->
+      <section class="panel customer-panel active" id="customerPanel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Yakındaki Kahve Mekanları</div>
+            <div class="panel-sub">Bodrum Merkez, Bitez ve Turgutreis için Coffee Box listesi</div>
           </div>
-          <div style="display:flex;flex-wrap:wrap;gap:0.3rem;">
-            <button class="btn btn-outline" data-filter="all">Tümü</button>
-            <button class="btn btn-outline" data-filter="thirdwave">3. dalga</button>
-            <button class="btn btn-outline" data-filter="work">Laptop ile çalışmaya uygun</button>
-            <button class="btn btn-outline" data-filter="wifi">Güçlü Wi-Fi</button>
-          </div>
+          <div class="badge">Bodrum Coffee Box • Pilot</div>
         </div>
-      </div>
 
-      <div class="shop-list" id="shop-list"></div>
-    </section>
+        <div class="filters">
+          <button class="filter-pill active" data-district="all">Tüm bölgeler</button>
+          <button class="filter-pill" data-district="Bodrum Merkez">Bodrum Merkez</button>
+          <button class="filter-pill" data-district="Bitez">Bitez</button>
+          <button class="filter-pill" data-district="Turgutreis">Turgutreis</button>
+        </div>
 
-    <section id="business-section" style="display:none;">
-      <div class="section-title">Coffee Star işletme üyeliği</div>
-      <div class="section-sub">
-        Coffee Star ağına katılın, mekânınız kahve severler tarafından puanlansın. İlk fazda Türkiye,
-        ikinci fazda Balkan ülkeleri hedeflenmektedir. Bu sürüm demo amaçlıdır, tüm veriler cihazınızda saklanır.
-      </div>
+        <p class="distance-note" id="distanceNote">
+          📍 Konum izni verirsen, mekanlar sana en yakın olandan başlayarak sıralanır.
+        </p>
 
-      <div class="business-layout">
-        <div class="card">
-          <h3 style="font-size:0.95rem;font-weight:700;margin:0 0 0.6rem;">Üyelik başvuru formu</h3>
-          <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.6rem;">
-            Yıllık yaklaşık <strong>$20</strong> üyelik ücreti ile Coffee Star sistemine katılım.
-            Gerçek fiyatlandırma, sözleşme ve ödeme altyapısı ana ekosistemde yönetilecektir; bu ekran işletme tarafı
-            için demo iş akışını gösterir.
+        <div class="cards" id="venueList"></div>
+      </section>
+
+      <!-- BUSINESS PANEL -->
+      <section class="panel business-panel" id="businessPanel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Coffee Box • İşletme Üyelik Başvurusu</div>
+            <div class="panel-sub">Bodrum’daki kahve odaklı mekanları pilot ağa dahil ediyoruz.</div>
           </div>
-          <form id="membership-form">
-            <div class="form-group">
-              <label>İşletme adı *</label>
-              <input type="text" name="shop_name" required />
+          <div class="badge">TiT Technologies Programı</div>
+        </div>
+
+        <p class="small-note">
+          Formu doldurduğunuzda ekibinizle iletişime geçilecek. Bu sürümde veriler yalnızca cihazınızda saklanır (demo).
+        </p>
+
+        <form id="businessForm">
+          <div class="form-grid">
+            <div class="form-field">
+              <label>İşletme Adı *</label>
+              <input type="text" name="name" required placeholder="Örn: Seaside Brew Bodrum" />
             </div>
-            <div class="form-group">
-              <label>Yetkili kişi</label>
-              <input type="text" name="contact_name" />
+            <div class="form-field">
+              <label>Bölge / İlçe *</label>
+              <select name="district" required>
+                <option value="">Seçiniz</option>
+                <option value="Bodrum Merkez">Bodrum Merkez</option>
+                <option value="Bitez">Bitez</option>
+                <option value="Turgutreis">Turgutreis</option>
+              </select>
             </div>
-            <div class="form-group">
+            <div class="form-field">
+              <label>Adres</label>
+              <input type="text" name="address" placeholder="Sokak, cadde, mevki" />
+            </div>
+            <div class="form-field">
+              <label>Yetkili İsim</label>
+              <input type="text" name="contactName" placeholder="İşletme sahibi / yönetici" />
+            </div>
+            <div class="form-field">
               <label>Telefon</label>
-              <input type="tel" name="phone" />
+              <input type="tel" name="phone" placeholder="+90 ..." />
             </div>
-            <div class="form-group">
+            <div class="form-field">
               <label>E-posta</label>
-              <input type="email" name="email" />
+              <input type="email" name="email" placeholder="ornek@coffeebox.com" />
             </div>
-            <div class="form-group" style="display:flex;gap:0.4rem;">
-              <div style="flex:1;">
-                <label>Şehir</label>
-                <input type="text" name="city" />
-              </div>
-              <div style="flex:1;">
-                <label>Ülke</label>
-                <input type="text" name="country" value="Türkiye" />
-              </div>
+          </div>
+
+          <div class="form-field">
+            <label>Konsept ve kahve yaklaşımınız</label>
+            <textarea name="concept" placeholder="3. dalga, single origin, espresso bar, nitelikli filtre, vb."></textarea>
+            <div class="form-helper">
+              Kısa şekilde anlatabilirsiniz; ekip bunu referans alacak.
             </div>
-            <div class="form-group">
-              <label>
-                <input type="checkbox" name="has_third_wave" checked />
-                3. dalga / özel kahve konseptine yakınız
-              </label>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Fiyat Seviyesi (Genel)</label>
+              <select name="priceLevel">
+                <option value="">Seçiniz</option>
+                <option value="1">☕ Uygun</option>
+                <option value="2">☕☕ Orta</option>
+                <option value="3">☕☕☕ Premium</option>
+                <option value="4">☕☕☕☕ Lüks / manzaralı</option>
+              </select>
             </div>
-            <div class="form-group">
-              <label>
-                <input type="checkbox" name="wants_coffee_star" checked />
-                Coffee Star derecelendirmesine başvurmak istiyoruz
-              </label>
+            <div class="form-field">
+              <label>Çalışma Alanı / Wi-Fi</label>
+              <select name="workWifi">
+                <option value="">Seçiniz</option>
+                <option value="Yok">Standart oturma alanı</option>
+                <option value="Var">Laptop ile çalışmaya uygun & güçlü Wi-Fi</option>
+              </select>
             </div>
-            <div class="form-group">
-              <label>Notlar (ekipman, kavurucu, konsept, çalışma saatleri vb.)</label>
-              <textarea name="notes"></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary" style="width:100%;margin-top:0.3rem;">Başvuruyu kaydet</button>
-            <div id="membership-message" style="margin-top:0.4rem;"></div>
-          </form>
+          </div>
+
+          <button type="submit" class="submit-btn">
+            Başvuruyu Gönder
+            <span>→</span>
+          </button>
+          <p class="small-note">
+            Bu sürümde başvurular cihazına kaydedilir. Gerçek sistemde TiT Technologies ekibine ve admin panele düşecektir.
+          </p>
+        </form>
+
+        <div class="biz-list" id="bizList">
+          <div class="tiny-title">Bu cihazdan yapılan başvurular (demo)</div>
         </div>
+      </section>
+    </main>
+  </div>
 
-        <div class="card">
-          <h3 style="font-size:0.95rem;font-weight:700;margin-top:0;margin-bottom:0.6rem;">Başvurularınız</h3>
-          <div id="membership-list" style="font-size:0.8rem;"></div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <div id="modal-root"></div>
-
-  <footer>
-    Coffee Star MVP – tüm veriler sadece bu cihazda <strong>localStorage</strong> içinde tutulur.
-    Bir sonraki aşamada bu yapı, senin ekosistemindeki ana veritabanına bağlanacak ve Türkiye + Balkan ülkeleri
-    için çok kullanıcılı hale getirilecektir.
-  </footer>
+  <div class="footer">
+    <span>TiT</span> Technologies • Coffee Box Bodrum Pilot
+  </div>
 
   <script>
-    const STORAGE_KEY_SHOPS = "coffeeStar.shops.v1";
-    const STORAGE_KEY_REVIEWS = "coffeeStar.reviews.v1";
-    const STORAGE_KEY_MEMBERSHIPS = "coffeeStar.memberships.v1";
+    // --- DATA ---
 
-    const defaultShops = [
+    const venues = [
       {
         id: 1,
-        name: "Third Wave Lab",
-        city: "İstanbul",
-        district: "Moda",
-        thirdWave: true,
-        wifi: true,
-        workFriendly: true,
-        priceLevel: "₺₺",
-        beans: "Tek köken, light roast",
-        methods: ["V60", "Chemex", "Aeropress"],
-        tags: ["3. dalga", "Specialty", "Slow coffee", "Türkiye"]
+        name: "Seaside Brew Bodrum",
+        district: "Bodrum Merkez",
+        rating: 4.8,
+        votes: 124,
+        priceLevel: 3,
+        tags: ["3. dalga", "Single origin", "Espresso bar"],
+        notes: "Kale manzaralı nitelikli kahve barı.",
+        wifi: "Güçlü Wi-Fi, laptop ile çalışmaya uygun",
+        approxDistance: 0.8 // km - varsayılan
       },
       {
         id: 2,
-        name: "Roaster's Corner",
-        city: "İstanbul",
-        district: "Karaköy",
-        thirdWave: true,
-        wifi: true,
-        workFriendly: false,
-        priceLevel: "₺₺₺",
-        beans: "Kendi kavurumu, micro lot",
-        methods: ["Espresso", "V60", "Cold Brew"],
-        tags: ["Mikro kavurucu", "Espresso bar", "Türkiye"]
+        name: "Dockside Coffee Lab",
+        district: "Bodrum Merkez",
+        rating: 4.6,
+        votes: 89,
+        priceLevel: 2,
+        tags: ["Filtre kahve", "Cold brew"],
+        notes: "Marina tarafında, sakin ve minimal iç mekan.",
+        wifi: "İyi Wi-Fi",
+        approxDistance: 1.3
       },
       {
         id: 3,
-        name: "Daily Grind",
-        city: "Ankara",
-        district: "Tunus",
-        thirdWave: false,
-        wifi: true,
-        workFriendly: true,
-        priceLevel: "₺",
-        beans: "Blend",
-        methods: ["Espresso", "Filtre kahve"],
-        tags: ["Çalışma dostu", "Uygun fiyat", "Türkiye"]
+        name: "Bitez Bean House",
+        district: "Bitez",
+        rating: 4.7,
+        votes: 102,
+        priceLevel: 2,
+        tags: ["3. dalga", "Tatlı & pastry"],
+        notes: "Sahil yoluna yakın, gölgeli oturma alanları.",
+        wifi: "Güçlü Wi-Fi",
+        approxDistance: 3.2
       },
       {
         id: 4,
-        name: "Seaside Brew",
-        city: "Bodrum",
-        district: "Yalıkavak",
-        thirdWave: true,
-        wifi: true,
-        workFriendly: true,
-        priceLevel: "₺₺₺",
-        beans: "Specialty, washed & natural",
-        methods: ["Espresso", "V60", "Syphon"],
-        tags: ["Deniz manzaralı", "Gün batımı", "3. dalga", "Türkiye"]
+        name: "Surfside Roasters",
+        district: "Bitez",
+        rating: 4.5,
+        votes: 76,
+        priceLevel: 3,
+        tags: ["Roastery", "Espresso & V60"],
+        notes: "Kendi kavurucusu olan butik kahve dükkânı.",
+        wifi: "Orta seviye Wi-Fi",
+        approxDistance: 3.8
+      },
+      {
+        id: 5,
+        name: "Turgutreis Sunset Coffee",
+        district: "Turgutreis",
+        rating: 4.4,
+        votes: 64,
+        priceLevel: 3,
+        tags: ["Gün batımı", "Latte art"],
+        notes: "Gün batımı manzaralı, turist ağırlıklı kahve noktası.",
+        wifi: "Wi-Fi mevcut",
+        approxDistance: 18.0
+      },
+      {
+        id: 6,
+        name: "Harbor Work & Brew",
+        district: "Turgutreis",
+        rating: 4.3,
+        votes: 51,
+        priceLevel: 2,
+        tags: ["Coworking", "Güçlü Wi-Fi"],
+        notes: "Uzun süreli çalışmaya uygun masa ve priz imkanı.",
+        wifi: "Güçlü Wi-Fi, laptop alanları",
+        approxDistance: 17.5
       }
     ];
 
-    function loadLocal(key, fallback) {
-      try {
-        const raw = localStorage.getItem(key);
-        if (!raw) return fallback;
-        return JSON.parse(raw);
-      } catch (e) {
-        console.warn("localStorage parse error", key, e);
-        return fallback;
-      }
-    }
+    // --- STATE & DOM ---
 
-    function saveLocal(key, value) {
-      try {
-        localStorage.setItem(key, JSON.stringify(value));
-      } catch (e) {
-        console.warn("localStorage save error", key, e);
-      }
-    }
+    const venueList = document.getElementById("venueList");
+    const filterButtons = document.querySelectorAll(".filter-pill");
+    const distanceNote = document.getElementById("distanceNote");
+    const modeButtons = document.querySelectorAll(".mode-btn");
+    const customerPanel = document.getElementById("customerPanel");
+    const businessPanel = document.getElementById("businessPanel");
+    const bizForm = document.getElementById("businessForm");
+    const bizList = document.getElementById("bizList");
 
-    let shops = loadLocal(STORAGE_KEY_SHOPS, defaultShops);
-    let reviews = loadLocal(STORAGE_KEY_REVIEWS, []);
-    let memberships = loadLocal(STORAGE_KEY_MEMBERSHIPS, []);
+    let activeDistrict = "all";
 
-    let currentFilter = "all";
+    // --- RENDER FUNCTIONS ---
 
-    function computeAverageRating(shopId) {
-      const rs = reviews.filter(r => r.shopId === shopId);
-      if (rs.length === 0) return null;
-      const avg = rs.reduce((sum, r) => sum + r.rating, 0) / rs.length;
-      return { avg, count: rs.length };
-    }
+    function renderVenues() {
+      let filtered = venues.slice();
 
-    function renderShops() {
-      const container = document.getElementById("shop-list");
-      container.innerHTML = "";
-
-      let filtered = shops;
-      if (currentFilter === "thirdwave") {
-        filtered = shops.filter(s => s.thirdWave);
-      } else if (currentFilter === "work") {
-        filtered = shops.filter(s => s.workFriendly);
-      } else if (currentFilter === "wifi") {
-        filtered = shops.filter(s => s.wifi);
+      if (activeDistrict !== "all") {
+        filtered = filtered.filter(v => v.district === activeDistrict);
       }
 
-      if (filtered.length === 0) {
-        container.innerHTML = '<div style="font-size:0.85rem;color:var(--text-muted);">Filtreye uyan mekân bulunamadı.</div>';
-        return;
-      }
+      filtered.sort((a, b) => a.approxDistance - b.approxDistance || b.rating - a.rating);
 
-      filtered.forEach(shop => {
-        const ratingInfo = computeAverageRating(shop.id);
-        const div = document.createElement("div");
-        div.className = "shop-card";
+      venueList.innerHTML = "";
 
-        const badges = [];
-        if (shop.thirdWave) {
-          badges.push('<span class="badge badge-star">3. dalga</span>');
-        }
-        if (shop.wifi) {
-          badges.push('<span class="badge badge-wifi">Wi-Fi</span>');
-        }
-        if (shop.workFriendly) {
-          badges.push('<span class="badge badge-laptop">Laptop ile çalışma</span>');
-        }
+      filtered.forEach(v => {
+        const card = document.createElement("article");
+        card.className = "card";
 
-        const ratingHtml = ratingInfo
-          ? `\<span class="rating-pill">⭐ ${ratingInfo.avg.toFixed(1)} · ${ratingInfo.count} oy\</span>`
-          : '<span class="rating-pill">Henüz oy yok</span>';
-
-        div.innerHTML = `
-          <div class="shop-tag">${shop.priceLevel}</div>
-          <div class="shop-name">${shop.name}</div>
-          <div class="shop-location">${shop.city} · ${shop.district}</div>
-          <div class="shop-row">
-            <div>${ratingHtml}</div>
-          </div>
-          <div class="chips">${badges.join("")}</div>
-          <div class="shop-row" style="margin-top:0.4rem;">
-            <div class="pill">${shop.beans}</div>
-          </div>
-          <div class="chips">
-            ${shop.methods.map(m => `<span class="chip">${m}</span>`).join("")}
-          </div>
-          <div class="shop-actions">
-            <button class="btn btn-primary" data-action="rate" data-id="${shop.id}">
-              Değerlendir
-            </button>
-            <button class="btn btn-outline" data-action="details" data-id="${shop.id}">
-              Detay
-            </button>
+        const photo = document.createElement("div");
+        photo.className = "card-photo";
+        photo.innerHTML = `
+          <div class="card-photo-inner">
+            <div class="card-photo-name">${v.name}</div>
+            <div class="card-photo-district">${v.district}</div>
           </div>
         `;
 
-        container.appendChild(div);
-      });
-    }
+        const body = document.createElement("div");
 
-    function openModal(contentHtml) {
-      const root = document.getElementById("modal-root");
-      root.innerHTML = "";
-      const backdrop = document.createElement("div");
-      backdrop.className = "modal-backdrop";
-      backdrop.innerHTML = '<div class="modal">' + contentHtml + "</div>";
-      backdrop.addEventListener("click", (e) => {
-        if (e.target === backdrop) {
-          root.innerHTML = "";
-        }
-      });
-      root.appendChild(backdrop);
-    }
+        const ratingRow = document.createElement("div");
+        ratingRow.className = "rating-row";
+        ratingRow.innerHTML = `
+          <span class="rating-score">⭐ ${v.rating.toFixed(1)}</span>
+          <span>${v.votes} oy</span>
+          <span class="price-level">${"☕".repeat(v.priceLevel)}</span>
+        `;
 
-    function closeModal() {
-      const root = document.getElementById("modal-root");
-      root.innerHTML = "";
-    }
+        const title = document.createElement("div");
+        title.className = "card-body-title";
+        title.textContent = v.name;
 
-    function openRateModal(shopId) {
-      const shop = shops.find(s => s.id === shopId);
-      if (!shop) return;
+        const sub = document.createElement("div");
+        sub.className = "card-body-sub";
+        sub.textContent = v.notes;
 
-      const ratingInfo = computeAverageRating(shop.id);
-      const ratingText = ratingInfo
-        ? `Şu an ortalama: ${ratingInfo.avg.toFixed(1)} / 5 (${ratingInfo.count} oy)`
-        : "Henüz oy yok, ilk sen değerlendir.";
-
-      const html = `
-        <h2 style="margin-top:0;font-size:1rem;font-weight:700;">${shop.name} için puan ver</h2>
-        <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.6rem;">${ratingText}</div>
-        <form id="rate-form">
-          <div class="form-group">
-            <label>Puan (1–5)</label>
-            <select name="rating">
-              <option value="5">5 – Mükemmel</option>
-              <option value="4">4 – Çok iyi</option>
-              <option value="3">3 – Ortalama</option>
-              <option value="2">2 – Zayıf</option>
-              <option value="1">1 – Kötü</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Yorum (opsiyonel)</label>
-            <textarea name="comment" placeholder="Kahve kalitesi, ortam, müzik, servis..."></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary" style="width:100%;margin-top:0.3rem;">Kaydet</button>
-          <button type="button" class="btn btn-outline" style="width:100%;margin-top:0.3rem;" data-close="1">Vazgeç</button>
-          <div id="rate-message" style="margin-top:0.4rem;"></div>
-        </form>
-      `;
-
-      openModal(html);
-
-      const form = document.getElementById("rate-form");
-      const msgBox = document.getElementById("rate-message");
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const formData = new FormData(form);
-        const rating = parseInt(formData.get("rating") || "5", 10);
-        const comment = (formData.get("comment") || "").toString().trim();
-
-        reviews.push({
-          id: Date.now(),
-          shopId: shop.id,
-          rating,
-          comment,
-          createdAt: new Date().toISOString()
+        const tagsRow = document.createElement("div");
+        tagsRow.className = "card-tags";
+        v.tags.forEach(t => {
+          const tag = document.createElement("span");
+          tag.className = "tag";
+          tag.textContent = t;
+          tagsRow.appendChild(tag);
         });
-        saveLocal(STORAGE_KEY_REVIEWS, reviews);
 
-        msgBox.innerHTML = '<div class="alert alert-success">Değerlendirmen kaydedildi. Teşekkürler! ☕</div>';
-        renderShops();
-        setTimeout(closeModal, 900);
-      });
+        const footerRow = document.createElement("div");
+        footerRow.className = "card-footer-row";
 
-      form.querySelectorAll("[data-close]").forEach(btn => {
-        btn.addEventListener("click", closeModal);
+        const leftFoot = document.createElement("div");
+        leftFoot.textContent = `${v.district} • ~${v.approxDistance.toFixed(1)} km tahmini mesafe`;
+
+        const btnRow = document.createElement("div");
+        btnRow.className = "btn-row";
+        const btnDetail = document.createElement("button");
+        btnDetail.className = "btn-sm";
+        btnDetail.textContent = "Detay / Yorum";
+        btnDetail.onclick = () => {
+          alert(
+            `${v.name}\n\nPuan: ${v.rating.toFixed(1)} (${v.votes} oy)\nBölge: ${v.district}\nFiyat: ${"☕".repeat(v.priceLevel)}\n\nNot: ${v.notes}\n\nBu sürüm demo. Gerçek yorum sistemi Supabase / backend ile devreye alınacak.`
+          );
+        };
+
+        const btnRate = document.createElement("button");
+        btnRate.className = "btn-sm primary";
+        btnRate.textContent = "Puan Ver";
+        btnRate.onclick = () => {
+          alert(
+            `${v.name} için puan verme ekranı (demo).\n\nGerçek sistemde kullanıcı login + rating / yorum akışı açılacak.`
+          );
+        };
+
+        btnRow.appendChild(btnDetail);
+        btnRow.appendChild(btnRate);
+
+        footerRow.appendChild(leftFoot);
+        footerRow.appendChild(btnRow);
+
+        body.appendChild(ratingRow);
+        body.appendChild(title);
+        body.appendChild(sub);
+        body.appendChild(tagsRow);
+        body.appendChild(footerRow);
+
+        card.appendChild(photo);
+        card.appendChild(body);
+
+        venueList.appendChild(card);
       });
     }
 
-    function openDetailsModal(shopId) {
-      const shop = shops.find(s => s.id === shopId);
-      if (!shop) return;
-      const rs = reviews.filter(r => r.shopId === shop.id).sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
-      const ratingInfo = computeAverageRating(shop.id);
+    // --- FILTER HANDLERS ---
 
-      const ratingHeader = ratingInfo
-        ? `<div class="rating-pill" style="margin-top:0.2rem;">⭐ ${ratingInfo.avg.toFixed(1)} · ${ratingInfo.count} oy</div>`
-        : '<div class="rating-pill" style="margin-top:0.2rem;">Henüz oy yok</div>';
-
-      const reviewHtml = rs.length === 0
-        ? '<div style="font-size:0.8rem;color:var(--text-muted);">Henüz yorum yok.</div>'
-        : rs.map(r => `
-            <div style="border-top:1px dashed var(--border);padding-top:0.4rem;margin-top:0.4rem;font-size:0.8rem;">
-              <div style="font-weight:600;">⭐ ${r.rating} / 5</div>
-              ${r.comment ? '<div style="margin-top:0.1rem;">' + r.comment.replace(/</g,"&lt;") + '</div>' : ''}
-              <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.1rem;">
-                ${new Date(r.createdAt).toLocaleString("tr-TR")}
-              </div>
-            </div>
-          `).join("");
-
-      const html = `
-        <h2 style="margin-top:0;font-size:1rem;font-weight:700;">${shop.name}</h2>
-        <div style="font-size:0.8rem;color:var(--text-muted);">${shop.city} · ${shop.district}</div>
-        ${ratingHeader}
-        <div style="margin-top:0.6rem;font-size:0.8rem;">
-          <div><strong>Çekirdek:</strong> ${shop.beans}</div>
-          <div style="margin-top:0.2rem;"><strong>Demleme yöntemleri:</strong></div>
-          <div class="chips" style="margin-top:0.25rem;">
-            ${shop.methods.map(m => `<span class="chip">${m}</span>`).join("")}
-          </div>
-          ${shop.tags && shop.tags.length ? '<div style="margin-top:0.4rem;"><strong>Öne çıkanlar:</strong></div>' : ''}
-          ${shop.tags && shop.tags.length ? '<div class="chips" style="margin-top:0.25rem;">' + shop.tags.map(t => '<span class="chip">'+t+'</span>').join('') + '</div>' : ''}
-        </div>
-
-        <div style="margin-top:0.8rem;">
-          <h3 style="font-size:0.9rem;font-weight:700;margin:0 0 0.3rem;">Yorumlar</h3>
-          ${reviewHtml}
-        </div>
-
-        <div style="margin-top:0.9rem;display:flex;gap:0.4rem;">
-          <button class="btn btn-primary" data-action="rate-now" style="flex:1;">Bu mekânı değerlendir</button>
-          <button class="btn btn-outline" data-close="1" style="flex:1;">Kapat</button>
-        </div>
-      `;
-
-      openModal(html);
-
-      const modal = document.querySelector(".modal");
-      modal.querySelectorAll("[data-close]").forEach(btn => {
-        btn.addEventListener("click", closeModal);
-      });
-      const rateBtn = modal.querySelector('[data-action="rate-now"]');
-      if (rateBtn) {
-        rateBtn.addEventListener("click", () => {
-          openRateModal(shop.id);
-        });
-      }
-    }
-
-    document.getElementById("shop-list").addEventListener("click", (e) => {
-      const btn = e.target.closest("button");
-      if (!btn) return;
-      const action = btn.getAttribute("data-action");
-      const id = parseInt(btn.getAttribute("data-id"), 10);
-      if (action === "rate") {
-        openRateModal(id);
-      } else if (action === "details") {
-        openDetailsModal(id);
-      }
-    });
-
-    document.querySelectorAll("[data-filter]").forEach(btn => {
+    filterButtons.forEach(btn => {
       btn.addEventListener("click", () => {
-        currentFilter = btn.getAttribute("data-filter");
-        document.querySelectorAll("[data-filter]").forEach(b => {
-          b.classList.toggle("btn-primary", b === btn);
-          b.classList.toggle("btn-outline", b !== btn);
-        });
-        renderShops();
+        filterButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        activeDistrict = btn.dataset.district;
+        renderVenues();
       });
     });
 
-    const modeButtons = document.querySelectorAll(".mode-btn");
+    // --- MODE TOGGLE ---
+
     modeButtons.forEach(btn => {
       btn.addEventListener("click", () => {
-        const mode = btn.getAttribute("data-mode");
-        modeButtons.forEach(b => b.classList.toggle("active", b === btn));
-        document.getElementById("customer-section").style.display = mode === "customer" ? "" : "none";
-        document.getElementById("business-section").style.display = mode === "business" ? "" : "none";
+        modeButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        const mode = btn.dataset.mode;
+        if (mode === "customer") {
+          customerPanel.classList.add("active");
+          businessPanel.classList.remove("active");
+        } else {
+          customerPanel.classList.remove("active");
+          businessPanel.classList.add("active");
+        }
       });
     });
 
-    const membershipForm = document.getElementById("membership-form");
-    const membershipMessage = document.getElementById("membership-message");
-    const membershipList = document.getElementById("membership-list");
+    // --- BUSINESS FORM (LOCAL DEMO) ---
 
-    membershipForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const formData = new FormData(membershipForm);
-      const entry = {
-        id: Date.now(),
-        shop_name: (formData.get("shop_name") || "").toString().trim(),
-        contact_name: (formData.get("contact_name") || "").toString().trim(),
-        phone: (formData.get("phone") || "").toString().trim(),
-        email: (formData.get("email") || "").toString().trim(),
-        city: (formData.get("city") || "").toString().trim(),
-        country: (formData.get("country") || "").toString().trim(),
-        has_third_wave: !!formData.get("has_third_wave"),
-        wants_coffee_star: !!formData.get("wants_coffee_star"),
-        notes: (formData.get("notes") || "").toString().trim(),
-        status: "Taslak",
-        createdAt: new Date().toISOString()
-      };
+    function loadBizFromStorage() {
+      const raw = localStorage.getItem("coffeeBoxBiz");
+      const all = raw ? JSON.parse(raw) : [];
+      bizList.innerHTML = '<div class="tiny-title">Bu cihazdan yapılan başvurular (demo)</div>';
 
-      if (!entry.shop_name) {
-        membershipMessage.innerHTML = '<div class="alert alert-error">İşletme adı zorunludur.</div>';
-        return;
-      }
-
-      memberships.push(entry);
-      saveLocal(STORAGE_KEY_MEMBERSHIPS, memberships);
-      membershipForm.reset();
-      membershipMessage.innerHTML = '<div class="alert alert-success">Başvurunuz bu cihazda kayıt altına alındı. Ana sistemde gerçek başvuru API\'si ile entegre edilebilir.</div>';
-      renderMemberships();
-    });
-
-    function renderMemberships() {
-      membershipList.innerHTML = "";
-      if (memberships.length === 0) {
-        membershipList.innerHTML = '<div style="color:var(--text-muted);">Henüz kayıtlı bir başvurunuz yok.</div>';
-        return;
-      }
-      memberships
-        .slice()
-        .sort((a,b) => (a.createdAt < b.createdAt ? 1 : -1))
-        .forEach(m => {
-          const div = document.createElement("div");
-          div.style.borderTop = "1px dashed var(--border)";
-          div.style.paddingTop = "0.4rem";
-          div.style.marginTop = "0.4rem";
-          div.innerHTML = `
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <div style="font-weight:600;">${m.shop_name}</div>
-              <span class="badge-status">${m.status}</span>
-            </div>
-            <div class="stat-row">
-              <span class="stat-label">Konum</span>
-              <span class="stat-value">${m.city || "-"} · ${m.country || "-"}</span>
-            </div>
-            <div class="stat-row">
-              <span class="stat-label">İletişim</span>
-              <span class="stat-value">${m.contact_name || "-"} ${m.phone ? " · " + m.phone : ""}</span>
-            </div>
-            <div class="stat-row">
-              <span class="stat-label">Coffee Star</span>
-              <span class="stat-value">${m.wants_coffee_star ? "Evet" : "Hayır"}</span>
-            </div>
-            <div class="stat-row">
-              <span class="stat-label">3. dalga uyumu</span>
-              <span class="stat-value">${m.has_third_wave ? "Evet" : "Belki / Hayır"}</span>
-            </div>
-            ${m.notes ? '<div style="margin-top:0.25rem;font-size:0.75rem;color:var(--text-muted);">'+m.notes.replace(/</g,"&lt;")+'</div>' : ''}
-            <div style="margin-top:0.25rem;font-size:0.7rem;color:var(--text-muted);">
-              Kaydedildi: ${new Date(m.createdAt).toLocaleString("tr-TR")}
-            </div>
-          `;
-          membershipList.appendChild(div);
-        });
+      all.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "biz-item";
+        row.innerHTML = `
+          <div>
+            <span class="name">${item.name}</span>
+            <span class="district"> • ${item.district}</span>
+          </div>
+          <div class="biz-status">Beklemede (demo)</div>
+        `;
+        bizList.appendChild(row);
+      });
     }
 
-    renderShops();
-    renderMemberships();
+    bizForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const formData = new FormData(bizForm);
+      const biz = {
+        name: formData.get("name") || "",
+        district: formData.get("district") || "",
+        ts: Date.now()
+      };
+
+      if (!biz.name || !biz.district) {
+        alert("Lütfen işletme adı ve bölge alanlarını doldurunuz.");
+        return;
+      }
+
+      const raw = localStorage.getItem("coffeeBoxBiz");
+      const all = raw ? JSON.parse(raw) : [];
+      all.push(biz);
+      localStorage.setItem("coffeeBoxBiz", JSON.stringify(all));
+
+      alert("Başvurunuz demo ortamında kaydedildi. Gerçek sistemde TiT Technologies ekibine iletilecek.");
+      bizForm.reset();
+      loadBizFromStorage();
+    });
+
+    // --- GEOLOCATION (OPSİYONEL) ---
+
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        () => {
+          distanceNote.textContent =
+            "📍 Konum izni aktif. Bu demo sürümde yaklaşık mesafe sabit, gerçek sistemde gerçek lokasyona göre sıralanacaktır.";
+        },
+        () => {
+          distanceNote.textContent =
+            "📍 Konum izni verilmedi. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.";
+        }
+      );
+    } else {
+      distanceNote.textContent =
+        "📍 Tarayıcınız konum desteği sunmuyor. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.";
+    }
+
+    // --- INIT ---
+
+    renderVenues();
+    loadBizFromStorage();
   </script>
 </body>
 </html>
