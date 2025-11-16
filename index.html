@@ -205,3 +205,230 @@
 
   loadVenues();
 </script>
+  // --- SUPABASE AYARLARI ---
+
+  const supabaseUrl = 'SUPABASE_URLİN';         // Örn: https://xxxxx.supabase.co
+  const supabaseKey = 'SUPABASE_ANON_KEYİN';    // Supabase anon public key
+
+  const { createClient } = window.supabase;
+  const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+  // --- STATE & DOM ---
+
+  const venueList = document.getElementById('venueList');
+  const filterButtons = document.querySelectorAll('.filter-pill');
+  const distanceNote = document.getElementById('distanceNote');
+  const modeButtons = document.querySelectorAll('.mode-btn');
+  const customerPanel = document.getElementById('customerPanel');
+  const businessPanel = document.getElementById('businessPanel');
+  const bizForm = document.getElementById('businessForm');
+  const bizList = document.getElementById('bizList');
+
+  let activeDistrict = 'all';
+  let venuesCache = [];
+
+  // --- SUPABASE ROW → FRONTEND NESNE ---
+
+  function mapRowToVenue(row) {
+    return {
+      id: row.id,
+      name: row.name,
+      district: row.district || 'Bodrum Merkez',
+      rating: typeof row.rating === 'number' ? row.rating : 0,
+      votes: typeof row.votes === 'number' ? row.votes : 0,
+      priceLevel:
+        row.pricelevel ??
+        row.price_level ??
+        row.price ??
+        2,
+      tags: row.tags ?? [],
+      notes: row.notes || row.description || '',
+      wifi: row.wifi || '',
+      approxDistance: row.approx_distance ?? row.distance_km ?? 0
+    };
+  }
+
+  // --- KART ÇİZİMİ ---
+
+  function renderVenueCards(data) {
+    if (!venueList) {
+      console.error('venueList elementi bulunamadı');
+      return;
+    }
+
+    venueList.innerHTML = '';
+
+    const filtered = data.filter(v => {
+      if (activeDistrict === 'all') return true;
+      return (v.district || '').toLowerCase() === activeDistrict.toLowerCase();
+    });
+
+    if (filtered.length === 0) {
+      venueList.innerHTML = '<p>Bu bölge için henüz kayıtlı kahve mekanı yok.</p>';
+      return;
+    }
+
+    filtered.forEach(v => {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      const headerRow = document.createElement('div');
+      headerRow.className = 'card-header-row';
+
+      const left = document.createElement('div');
+      left.className = 'card-header-left';
+
+      const nameEl = document.createElement('h3');
+      nameEl.textContent = v.name;
+      left.appendChild(nameEl);
+
+      const districtEl = document.createElement('div');
+      districtEl.className = 'meta';
+      districtEl.textContent = v.district || '';
+      left.appendChild(districtEl);
+
+      const distanceEl = document.createElement('div');
+      distanceEl.className = 'meta';
+      if (v.approxDistance) {
+        distanceEl.textContent = `~${v.approxDistance.toFixed(1)} km tahmini mesafe`;
+      }
+      left.appendChild(distanceEl);
+
+      const right = document.createElement('div');
+      right.className = 'card-header-right';
+      right.textContent = `${v.rating.toFixed(1)}  •  ${v.votes} oy`;
+
+      headerRow.appendChild(left);
+      headerRow.appendChild(right);
+
+      const body = document.createElement('div');
+      body.className = 'card-body';
+
+      if (v.notes) {
+        const notesEl = document.createElement('p');
+        notesEl.textContent = v.notes;
+        body.appendChild(notesEl);
+      }
+
+      if (Array.isArray(v.tags) && v.tags.length > 0) {
+        const tagsRow = document.createElement('div');
+        tagsRow.className = 'tag-row';
+        v.tags.forEach(tag => {
+          const span = document.createElement('span');
+          span.className = 'tag';
+          span.textContent = tag;
+          tagsRow.appendChild(span);
+        });
+        body.appendChild(tagsRow);
+      }
+
+      if (v.wifi) {
+        const wifiEl = document.createElement('div');
+        wifiEl.className = 'meta';
+        wifiEl.textContent = v.wifi;
+        body.appendChild(wifiEl);
+      }
+
+      const footer = document.createElement('div');
+      footer.className = 'card-footer-row';
+
+      const btnDetail = document.createElement('button');
+      btnDetail.className = 'btn-sm';
+      btnDetail.textContent = 'Detay / Yorum';
+      btnDetail.onclick = () => {
+        alert(
+          `${v.name}\n\nPuan: ${v.rating.toFixed(1)} (${v.votes} oy)\nBölge: ${v.district}\n\nNot: ${v.notes}`
+        );
+      };
+
+      const btnRate = document.createElement('button');
+      btnRate.className = 'btn-sm primary';
+      btnRate.textContent = 'Puan Ver';
+      btnRate.onclick = () => {
+        alert(
+          `${v.name} için puan verme ekranı (demo).\nGerçek sistemde kullanıcı login + rating / yorum akışı açılacak.`
+        );
+      };
+
+      footer.appendChild(btnDetail);
+      footer.appendChild(btnRate);
+
+      card.appendChild(headerRow);
+      card.appendChild(body);
+      card.appendChild(footer);
+
+      venueList.appendChild(card);
+    });
+  }
+
+  // --- SUPABASE'TEN VERİ ÇEK ---
+
+  async function loadVenues() {
+    try {
+      const { data, error } = await supabaseClient.from('venues').select('*');
+      if (error) {
+        console.error('Supabase error:', error);
+        renderVenueCards([]);
+        return;
+      }
+
+      console.log('Supabase Data:', data);
+      venuesCache = (data || []).map(mapRowToVenue);
+      renderVenueCards(venuesCache);
+    } catch (err) {
+      console.error('Beklenmeyen hata:', err);
+      renderVenueCards([]);
+    }
+  }
+
+  // --- FİLTRE BUTONLARI ---
+
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeDistrict = btn.dataset.district || 'all';
+      renderVenueCards(venuesCache);
+    });
+  });
+
+  // --- MOD (Müşteri / İşletme) BUTONLARI ---
+
+  modeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      modeButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const mode = btn.dataset.mode;
+      if (mode === 'customer') {
+        customerPanel.classList.add('active');
+        businessPanel.classList.remove('active');
+      } else {
+        customerPanel.classList.remove('active');
+        businessPanel.classList.add('active');
+      }
+    });
+  });
+
+  // --- GEOLOCATION BİLGİ METNİ (mesafeyi hesaplamıyoruz, sadece bilgilendirme) ---
+
+  if ('geolocation' in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        distanceNote.textContent =
+          '📍 Konum izni aktif. Bu demo sürümde yaklaşık mesafe sabit, gerçek sistemde gerçek lokasyona göre sıralanacaktır.';
+      },
+      () => {
+        distanceNote.textContent =
+          '📍 Konum izni verilmedi. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.';
+      }
+    );
+  } else {
+    distanceNote.textContent =
+      '📍 Tarayıcınız konum desteği sunmuyor. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.';
+  }
+
+  // --- İNİT ---
+
+  loadVenues();
+</script>
