@@ -1,434 +1,903 @@
-<script>
-  // --- SUPABASE AYARLARI ---
-  const supabaseUrl = 'https://giurtvcbubdkjrvfjdtc.supabase.co';
-  const supabaseKey =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpdXJ0dmNidWJka2pydmZqZHRjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE3OTcyMDAsImV4cCI6MjA0NzM3MzIwMH0._YsmW3YV_6Q6c4QbQZGYBtsBv88s3W0S5tRcIP_bZ5Y';
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Coffee Star • Coffee Box – Bodrum Pilot</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
 
-  const { createClient } = window.supabase;
-  const supabaseClient = createClient(supabaseUrl, supabaseKey);
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.0/dist/umd/supabase.min.js"></script>
 
-  // --- STATE & DOM ---
+    <style>
+      :root {
+        --turquoise: #11b5c8;
+        --turquoise-dark: #0b7f8e;
+        --turquoise-soft: #e0f7fa;
+        --coffee-dark: #4b2e19;
+        --coffee-soft: #f4e0c3;
+        --text-main: #172933;
+        --card-border: #dbd5e1;
+        --bg: #f1f5f9;
+        --accent: #f97316;
+        --radius-lg: 22px;
+      }
 
-  // Supabase'ten gelen verileri burada tutacağız
-  let venues = [];
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-  const venueList = document.getElementById('venueList');
-  const filterButtons = document.querySelectorAll('.filter-pill');
-  const distanceNote = document.getElementById('distanceNote');
-  const modeButtons = document.querySelectorAll('.mode-btn');
-  const customerPanel = document.getElementById('customerPanel');
-  const businessPanel = document.getElementById('businessPanel');
-  const bizForm = document.getElementById('businessForm');
-  const bizList = document.getElementById('bizList');
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+          "Segoe UI", sans-serif;
+        background: radial-gradient(120% 120% at top, #e0f7fa 0, #f8fafc 55%);
+        color: var(--text-main);
+        padding: 24px;
+      }
 
-  let activeDistrict = 'all';
+      .app-shell {
+        max-width: 1100px;
+        margin: 0 auto;
+        min-height: calc(100vh - 48px);
+        display: flex;
+        flex-direction: column;
+      }
 
-  // --- SUPABASE --> JS FORMAT ÇEVİRİCİ ---
+      /* HEADER */
 
-  function mapRowToVenue(row) {
-    return {
-      id: row.id,
-      name: row.name,
-      district: row.district || 'Bodrum Merkez',
-      rating: typeof row.rating === 'number' ? row.rating : 0,
-      votes: typeof row.votes === 'number' ? row.votes : 0,
-      priceLevel:
-        row.pricelevel ??
-        row.price_level ??
-        row.price ??
-        2, // kolon ismi farklarına tolerans
-      tags: row.tags ?? [],
-      notes: row.notes || row.description || '',
-      wifi: row.wifi || '',
-      approxDistance: row.approx_distance ?? row.distance_km ?? 0
-    };
-  }
+      .header {
+        background: linear-gradient(135deg, #0f8aa3, #11b5c8);
+        border-radius: 26px;
+        padding: 18px 24px;
+        color: #f9fafb;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 18px 45px rgba(15, 118, 137, 0.35);
+        margin-bottom: 20px;
+      }
 
-  // --- RENDER FONKSİYONU ---
+      .logo-box {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
 
-  function renderVenues(dataOverride) {
-    const data = dataOverride || venues;
+      .logo-circle {
+        width: 54px;
+        height: 54px;
+        border-radius: 18px;
+        background: rgba(15, 23, 42, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 20px;
+        letter-spacing: 1px;
+      }
 
-    if (!venueList) return;
+      .logo-circle span {
+        margin-top: 2px;
+      }
 
-    // Filtre: aktif bölge
-    let filtered = data;
-    if (activeDistrict !== 'all') {
-      filtered = data.filter(v => v.district === activeDistrict);
-    }
+      .logo-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
 
-    venueList.innerHTML = '';
+      .logo-text-title {
+        font-size: 18px;
+        font-weight: 700;
+      }
 
-    filtered.forEach(v => {
-      const card = document.createElement('div');
-      card.className = 'venue-card';
+      .logo-text-sub {
+        font-size: 12px;
+        opacity: 0.9;
+      }
 
-      const header = document.createElement('div');
-      header.className = 'venue-card-header';
+      .header-right {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1.8px;
+        opacity: 0.9;
+      }
 
-      const h3 = document.createElement('h3');
-      h3.textContent = v.name;
+      /* MODE SWITCH */
 
-      const info = document.createElement('div');
-      info.className = 'venue-info';
-      info.textContent = v.district || '';
+      .mode-switch {
+        display: inline-flex;
+        margin: 4px 0 18px;
+        padding: 4px;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.16);
+        gap: 4px;
+      }
 
-      header.appendChild(h3);
-      header.appendChild(info);
+      .mode-btn {
+        border-radius: 999px;
+        border: none;
+        padding: 6px 16px;
+        font-size: 13px;
+        cursor: pointer;
+        background: transparent;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.18s ease;
+      }
 
-      const body = document.createElement('div');
-      body.className = 'venue-card-body';
+      .mode-btn span.icon {
+        font-size: 14px;
+      }
 
-      const p = document.createElement('p');
-      p.textContent = v.notes || '';
-      body.appendChild(p);
+      .mode-btn.active {
+        background: #ffffff;
+        color: #0f172a;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.18);
+      }
 
-      const footer = document.createElement('div');
-      footer.className = 'venue-card-footer';
+      /* MAIN LAYOUT */
 
-      const btnRow = document.createElement('div');
-      btnRow.className = 'btn-row';
+      .content {
+        display: grid;
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+        gap: 24px;
+      }
 
-      const btnDetail = document.createElement('button');
-      btnDetail.className = 'btn-sm';
-      btnDetail.textContent = 'Detay / Yorum';
-      btnDetail.onclick = () => {
-        alert(
-          `${v.name}\n\nPuan: ${v.rating?.toFixed?.(1) || '0.0'} (${v.votes} oy)\n` +
-            `Bölge: ${v.district}\n` +
-            `Fiyat: ${'☕'.repeat(v.priceLevel || 1)}\n\n` +
-            `Not: ${v.notes || '-'}`
+      @media (max-width: 900px) {
+        .content {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      /* CUSTOMER PANEL */
+
+      .panel {
+        background: rgba(255, 255, 255, 0.88);
+        border-radius: 24px;
+        padding: 16px 18px 18px;
+        box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+      }
+
+      .panel-header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .panel-title {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .panel-title h2 {
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .panel-title span {
+        font-size: 11px;
+        color: #64748b;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        padding: 4px 10px;
+        font-size: 11px;
+        color: #475569;
+        gap: 6px;
+        background: #f8fafc;
+      }
+
+      .filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .filter-pill {
+        border-radius: 999px;
+        border: 1px solid #e2e8f0;
+        padding: 5px 12px;
+        font-size: 11px;
+        cursor: pointer;
+        background: #ffffff;
+        color: #475569;
+        transition: all 0.16s ease;
+      }
+
+      .filter-pill.active {
+        background: #0ea5e9;
+        color: white;
+        border-color: #0284c7;
+        box-shadow: 0 8px 18px rgba(14, 165, 233, 0.4);
+      }
+
+      .distance-note {
+        font-size: 11px;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-bottom: 10px;
+      }
+
+      .distance-note span.icon {
+        font-size: 14px;
+      }
+
+      .list-card-shell {
+        margin-top: 6px;
+        border-radius: 20px;
+        padding: 10px 10px 4px;
+        background: linear-gradient(
+          145deg,
+          rgba(148, 163, 184, 0.2),
+          rgba(226, 232, 240, 0.1)
         );
-      };
-
-      const btnRate = document.createElement('button');
-      btnRate.className = 'btn-sm primary';
-      btnRate.textContent = 'Puan Ver';
-      btnRate.onclick = () => {
-        alert(
-          `${v.name} için puan verme ekranı (demo).\n\nGerçek sistemde kullanıcı login + rating / yorum akışı açılacak.`
-        );
-      };
-
-      btnRow.appendChild(btnDetail);
-      btnRow.appendChild(btnRate);
-      footer.appendChild(btnRow);
-
-      card.appendChild(header);
-      card.appendChild(body);
-      card.appendChild(footer);
-
-      venueList.appendChild(card);
-    });
-  }
-
-  // --- SUPABASE'TEN VERİ ÇEKME ---
-
-  async function loadVenues() {
-    try {
-      const { data, error } = await supabaseClient.from('venues').select('*');
-
-      if (error) {
-        console.error('Supabase error:', error);
-        return;
       }
 
-      console.log('Supabase Data:', data);
-
-      venues = (data || []).map(mapRowToVenue);
-      renderVenues(); // ilk çizim
-    } catch (err) {
-      console.error('loadVenues exception:', err);
-    }
-  }
-
-  // --- FİLTRE BUTONLARI ---
-
-  filterButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      filterButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeDistrict = btn.dataset.district || 'all';
-      renderVenues();
-    });
-  });
-
-  // --- MOD (MÜŞTERİ / İŞLETME) BUTONLARI ---
-
-  modeButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      modeButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const mode = btn.dataset.mode;
-      if (mode === 'customer') {
-        customerPanel.classList.add('active');
-        businessPanel.classList.remove('active');
-      } else {
-        customerPanel.classList.remove('active');
-        businessPanel.classList.add('active');
-      }
-    });
-  });
-
-  // --- DEMO İŞLETME BAŞVURU FORMU (mevcut kodların korunması için basit placeholder) ---
-
-  if (bizForm) {
-    bizForm.addEventListener('submit', e => {
-      e.preventDefault();
-      alert(
-        'Demo sürüm: İşletme başvurunuz alındı gibi davranıyoruz 😊\nGerçek sistemde bu form Supabase’e kaydedilecek.'
-      );
-      bizForm.reset();
-    });
-  }
-
-  // --- GEOLOCATION NOTU (mevcut metni koruyoruz) ---
-
-  if ('geolocation' in navigator) {
-    navigator.geolocation.getCurrentPosition(
-      () => {
-        distanceNote.textContent =
-          '📍 Konum izni aktif. Bu demo sürümde yaklaşık mesafe sabit, gerçek sistemde gerçek lokasyona göre sıralanacaktır.';
-      },
-      () => {
-        distanceNote.textContent =
-          '📍 Konum izni verilmedi. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.';
-      }
-    );
-  } else {
-    distanceNote.textContent =
-      '📍 Tarayıcınız konum desteği sunmuyor. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.';
-  }
-
-  // --- INIT ---
-
-  loadVenues();
-</script>
-  // --- SUPABASE AYARLARI ---
-
-  const supabaseUrl = 'SUPABASE_URLİN';         // Örn: https://xxxxx.supabase.co
-  const supabaseKey = 'SUPABASE_ANON_KEYİN';    // Supabase anon public key
-
-  const { createClient } = window.supabase;
-  const supabaseClient = createClient(supabaseUrl, supabaseKey);
-
-  // --- STATE & DOM ---
-
-  const venueList = document.getElementById('venueList');
-  const filterButtons = document.querySelectorAll('.filter-pill');
-  const distanceNote = document.getElementById('distanceNote');
-  const modeButtons = document.querySelectorAll('.mode-btn');
-  const customerPanel = document.getElementById('customerPanel');
-  const businessPanel = document.getElementById('businessPanel');
-  const bizForm = document.getElementById('businessForm');
-  const bizList = document.getElementById('bizList');
-
-  let activeDistrict = 'all';
-  let venuesCache = [];
-
-  // --- SUPABASE ROW → FRONTEND NESNE ---
-
-  function mapRowToVenue(row) {
-    return {
-      id: row.id,
-      name: row.name,
-      district: row.district || 'Bodrum Merkez',
-      rating: typeof row.rating === 'number' ? row.rating : 0,
-      votes: typeof row.votes === 'number' ? row.votes : 0,
-      priceLevel:
-        row.pricelevel ??
-        row.price_level ??
-        row.price ??
-        2,
-      tags: row.tags ?? [],
-      notes: row.notes || row.description || '',
-      wifi: row.wifi || '',
-      approxDistance: row.approx_distance ?? row.distance_km ?? 0
-    };
-  }
-
-  // --- KART ÇİZİMİ ---
-
-  function renderVenueCards(data) {
-    if (!venueList) {
-      console.error('venueList elementi bulunamadı');
-      return;
-    }
-
-    venueList.innerHTML = '';
-
-    const filtered = data.filter(v => {
-      if (activeDistrict === 'all') return true;
-      return (v.district || '').toLowerCase() === activeDistrict.toLowerCase();
-    });
-
-    if (filtered.length === 0) {
-      venueList.innerHTML = '<p>Bu bölge için henüz kayıtlı kahve mekanı yok.</p>';
-      return;
-    }
-
-    filtered.forEach(v => {
-      const card = document.createElement('div');
-      card.className = 'card';
-
-      const headerRow = document.createElement('div');
-      headerRow.className = 'card-header-row';
-
-      const left = document.createElement('div');
-      left.className = 'card-header-left';
-
-      const nameEl = document.createElement('h3');
-      nameEl.textContent = v.name;
-      left.appendChild(nameEl);
-
-      const districtEl = document.createElement('div');
-      districtEl.className = 'meta';
-      districtEl.textContent = v.district || '';
-      left.appendChild(districtEl);
-
-      const distanceEl = document.createElement('div');
-      distanceEl.className = 'meta';
-      if (v.approxDistance) {
-        distanceEl.textContent = `~${v.approxDistance.toFixed(1)} km tahmini mesafe`;
-      }
-      left.appendChild(distanceEl);
-
-      const right = document.createElement('div');
-      right.className = 'card-header-right';
-      right.textContent = `${v.rating.toFixed(1)}  •  ${v.votes} oy`;
-
-      headerRow.appendChild(left);
-      headerRow.appendChild(right);
-
-      const body = document.createElement('div');
-      body.className = 'card-body';
-
-      if (v.notes) {
-        const notesEl = document.createElement('p');
-        notesEl.textContent = v.notes;
-        body.appendChild(notesEl);
+      .list-card-inner {
+        background: #f8fafc;
+        border-radius: 18px;
+        border: 1px solid rgba(203, 213, 225, 0.8);
+        padding: 10px;
+        max-height: 520px;
+        overflow-y: auto;
       }
 
-      if (Array.isArray(v.tags) && v.tags.length > 0) {
-        const tagsRow = document.createElement('div');
-        tagsRow.className = 'tag-row';
-        v.tags.forEach(tag => {
-          const span = document.createElement('span');
-          span.className = 'tag';
-          span.textContent = tag;
-          tagsRow.appendChild(span);
+      /* VENUE CARDS */
+
+      .card {
+        background: #ffffff;
+        border-radius: 18px;
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        padding: 12px 12px 10px;
+        margin-bottom: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+      }
+
+      .card-header-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .card-header-left h3 {
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 2px;
+      }
+
+      .meta {
+        font-size: 11px;
+        color: #6b7280;
+      }
+
+      .card-header-right {
+        font-size: 11px;
+        font-weight: 600;
+        color: #0f172a;
+        white-space: nowrap;
+        margin-top: 2px;
+      }
+
+      .card-body {
+        font-size: 11px;
+        color: #4b5563;
+        margin-top: 2px;
+      }
+
+      .card-body p {
+        margin-bottom: 4px;
+      }
+
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 2px;
+      }
+
+      .tag {
+        font-size: 10px;
+        border-radius: 999px;
+        padding: 2px 8px;
+        background: rgba(15, 118, 110, 0.06);
+        border: 1px solid rgba(34, 197, 94, 0.4);
+        color: #065f46;
+      }
+
+      .card-footer-row {
+        display: flex;
+        justify-content: flex-end;
+        gap: 6px;
+        margin-top: 4px;
+      }
+
+      .btn-sm {
+        border-radius: 999px;
+        border: 1px solid #cbd5f5;
+        background: #ffffff;
+        font-size: 11px;
+        padding: 4px 10px;
+        cursor: pointer;
+        color: #334155;
+        transition: all 0.14s ease;
+      }
+
+      .btn-sm.primary {
+        background: #0ea5e9;
+        border-color: #0284c7;
+        color: #f9fafb;
+      }
+
+      .btn-sm:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+      }
+
+      /* BUSINESS PANEL */
+
+      .panel-title-small {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+
+      .panel-sub {
+        font-size: 11px;
+        color: #64748b;
+        margin-bottom: 10px;
+      }
+
+      .biz-form-grid {
+        display: grid;
+        grid-template-columns: 1.1fr 1.2fr;
+        gap: 12px;
+      }
+
+      @media (max-width: 900px) {
+        .biz-form-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 11px;
+      }
+
+      .form-field label {
+        font-weight: 600;
+        color: #0f172a;
+      }
+
+      .form-field input,
+      .form-field select,
+      .form-field textarea {
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 6px 8px;
+        font-size: 11px;
+        font-family: inherit;
+        resize: vertical;
+      }
+
+      .form-field textarea {
+        min-height: 76px;
+      }
+
+      .form-actions {
+        margin-top: 10px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .btn-main {
+        border-radius: 999px;
+        border: none;
+        padding: 7px 16px;
+        background: linear-gradient(135deg, #0f766e, #22c55e);
+        color: white;
+        font-size: 12px;
+        cursor: pointer;
+        box-shadow: 0 12px 28px rgba(16, 185, 129, 0.4);
+      }
+
+      .small-note {
+        font-size: 10px;
+        color: #6b7280;
+        margin-top: 6px;
+      }
+
+      .biz-list {
+        margin-top: 12px;
+        padding-top: 8px;
+        border-top: 1px dashed #cbd5e1;
+        max-height: 230px;
+        overflow-y: auto;
+      }
+
+      .biz-item {
+        font-size: 11px;
+        padding: 4px 0;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+        display: flex;
+        justify-content: space-between;
+        gap: 6px;
+      }
+
+      .biz-item span.name {
+        font-weight: 600;
+      }
+
+      .biz-item span.district {
+        color: #64748b;
+      }
+
+      /* FOOTER */
+
+      .footer {
+        margin-top: 18px;
+        text-align: center;
+        font-size: 11px;
+        color: #64748b;
+      }
+
+      .footer span {
+        font-weight: 600;
+        color: #0f172a;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="app-shell">
+      <!-- HEADER -->
+      <header class="header">
+        <div class="logo-box">
+          <div class="logo-circle">
+            <span>CB</span>
+          </div>
+          <div class="logo-text">
+            <div class="logo-text-title">COFFEE STAR</div>
+            <div class="logo-text-sub">
+              Coffee Box™ — Bodrum Pilot • Yakındaki kahve noktalarını keşfet
+            </div>
+          </div>
+        </div>
+        <div class="header-right">POWERED BY TiT TECHNOLOGIES</div>
+      </header>
+
+      <!-- MODE SWITCH -->
+      <div class="mode-switch">
+        <button class="mode-btn active" data-mode="customer">
+          <span class="icon">👤</span>
+          <span>Müşteri</span>
+        </button>
+        <button class="mode-btn" data-mode="business">
+          <span class="icon">🏪</span>
+          <span>İşletme</span>
+        </button>
+      </div>
+
+      <!-- MAIN CONTENT -->
+      <main class="content">
+        <!-- CUSTOMER PANEL -->
+        <section
+          class="panel"
+          id="customerPanel"
+        >
+          <div class="panel-header-row">
+            <div class="panel-title">
+              <h2>Yakındaki Kahve Mekanları</h2>
+              <span>
+                Bodrum Merkez, Bitez ve Turgutreis için Coffee Box listesi
+              </span>
+            </div>
+            <div class="badge">
+              ☕️
+              <span>Bodrum Coffee Box • Pilot</span>
+            </div>
+          </div>
+
+          <!-- Filter pills -->
+          <div class="filter-row">
+            <button
+              class="filter-pill active"
+              data-district="all"
+            >
+              Tüm bölgeler
+            </button>
+            <button
+              class="filter-pill"
+              data-district="Bodrum Merkez"
+            >
+              Bodrum Merkez
+            </button>
+            <button
+              class="filter-pill"
+              data-district="Bitez"
+            >
+              Bitez
+            </button>
+            <button
+              class="filter-pill"
+              data-district="Turgutreis"
+            >
+              Turgutreis
+            </button>
+          </div>
+
+          <div class="distance-note">
+            <span class="icon">📍</span>
+            <span id="distanceNote">
+              Konum izni bu demo sürümde sabit; gerçek sistemde gerçek
+              lokasyona göre sıralama yapılacaktır.
+            </span>
+          </div>
+
+          <div class="list-card-shell">
+            <div class="list-card-inner" id="venueList">
+              <!-- JS ile doldurulacak -->
+            </div>
+          </div>
+        </section>
+
+        <!-- BUSINESS PANEL -->
+        <section
+          class="panel"
+          id="businessPanel"
+          style="display: none"
+        >
+          <div class="panel-title-small">
+            Coffee Box • İşletme Başvuru Formu (Bodrum Pilot)
+          </div>
+          <div class="panel-sub">
+            Bodrum Merkez, Bitez veya Turgutreis’te bir kahve işletmeniz varsa
+            formu doldurun; Coffee Box ekibi sizinle iletişime geçsin.
+          </div>
+
+          <form id="businessForm">
+            <div class="biz-form-grid">
+              <div>
+                <div class="form-field">
+                  <label>İşletme Adı</label>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Örn: Seaside Brew Bodrum"
+                    required
+                  />
+                </div>
+
+                <div class="form-field">
+                  <label>Bölge / İlçe</label>
+                  <select
+                    name="district"
+                    required
+                  >
+                    <option value="">Seçiniz</option>
+                    <option value="Bodrum Merkez">Bodrum Merkez</option>
+                    <option value="Bitez">Bitez</option>
+                    <option value="Turgutreis">Turgutreis</option>
+                  </select>
+                </div>
+
+                <div class="form-field">
+                  <label>İletişim E-posta</label>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="İşletme e-posta adresi"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div class="form-field">
+                  <label>Öne çıkan özellikler</label>
+                  <textarea
+                    name="notes"
+                    placeholder="Örn: 3. dalga kahve, kale manzarası, güçlü Wi-Fi, laptop çalışma alanı vb."
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="submit"
+                class="btn-main"
+              >
+                Başvuruyu Gönder
+              </button>
+            </div>
+
+            <div class="small-note">
+              Bu pilot sürümde form verileri yalnızca demo amaçlı kaydedilir.
+              Global lansmanda tüm başvurular Coffee Box ekibi tarafından
+              tek tek değerlendirilecektir.
+            </div>
+          </form>
+
+          <div
+            class="biz-list"
+            id="bizList"
+          >
+            <!-- İleride başvurular burada listelenebilir -->
+          </div>
+        </section>
+      </main>
+
+      <!-- FOOTER -->
+      <footer class="footer">
+        <span>TiT</span> Technologies • Coffee Box Bodrum Pilot
+      </footer>
+    </div>
+
+    <!-- APP SCRIPT -->
+    <script>
+      // --- SUPABASE AYARLARI ---
+
+      const supabaseUrl = "SUPABASE_URLİN"; https://girurtvcbudkjrvfjdte.supabase.co
+      const supabaseKey = "SUPABASE_ANON_KEYİN"; // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpcnVydHZjYnVka2pydmZqZHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzMDA1ODksImV4cCI6MjA3ODg3NjU4OX0.n2Q9bvirUMIFgH1l4G7prZHCvr1wxwzrSGZw9OCUJ9A
+
+      const { createClient } = window.supabase;
+      const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+      // --- STATE & DOM ---
+
+      const venueList = document.getElementById("venueList");
+      const filterButtons = document.querySelectorAll(".filter-pill");
+      const distanceNote = document.getElementById("distanceNote");
+      const modeButtons = document.querySelectorAll(".mode-btn");
+      const customerPanel = document.getElementById("customerPanel");
+      const businessPanel = document.getElementById("businessPanel");
+      const bizForm = document.getElementById("businessForm");
+      const bizList = document.getElementById("bizList");
+
+      let activeDistrict = "all";
+      let venuesCache = [];
+
+      // --- SUPABASE ROW → FRONTEND NESNE ---
+
+      function mapRowToVenue(row) {
+        return {
+          id: row.id,
+          name: row.name,
+          district: row.district || "Bodrum Merkez",
+          rating: typeof row.rating === "number" ? row.rating : 0,
+          votes: typeof row.votes === "number" ? row.votes : 0,
+          priceLevel:
+            row.pricelevel ?? row.price_level ?? row.price ?? row.priceLevel ?? 2,
+          tags: row.tags ?? [],
+          notes: row.notes || row.description || "",
+          wifi: row.wifi || "",
+          approxDistance: row.approx_distance ?? row.distance_km ?? 0,
+        };
+      }
+
+      // --- KART ÇİZİMİ ---
+
+      function renderVenueCards(data) {
+        if (!venueList) {
+          console.error("venueList elementi bulunamadı");
+          return;
+        }
+
+        venueList.innerHTML = "";
+
+        const filtered = data.filter((v) => {
+          if (activeDistrict === "all") return true;
+          return (v.district || "").toLowerCase() === activeDistrict.toLowerCase();
         });
-        body.appendChild(tagsRow);
+
+        if (filtered.length === 0) {
+          venueList.innerHTML = "<p>Bu bölge için henüz kayıtlı kahve mekanı yok.</p>";
+          return;
+        }
+
+        filtered.forEach((v) => {
+          const card = document.createElement("div");
+          card.className = "card";
+
+          const headerRow = document.createElement("div");
+          headerRow.className = "card-header-row";
+
+          const left = document.createElement("div");
+          left.className = "card-header-left";
+
+          const nameEl = document.createElement("h3");
+          nameEl.textContent = v.name;
+          left.appendChild(nameEl);
+
+          const districtEl = document.createElement("div");
+          districtEl.className = "meta";
+          districtEl.textContent = v.district || "";
+          left.appendChild(districtEl);
+
+          const distanceEl = document.createElement("div");
+          distanceEl.className = "meta";
+          if (v.approxDistance) {
+            distanceEl.textContent = `~${v.approxDistance.toFixed(
+              1
+            )} km tahmini mesafe`;
+          }
+          left.appendChild(distanceEl);
+
+          const right = document.createElement("div");
+          right.className = "card-header-right";
+          right.textContent = `${v.rating.toFixed(1)}  •  ${v.votes} oy`;
+
+          headerRow.appendChild(left);
+          headerRow.appendChild(right);
+
+          const body = document.createElement("div");
+          body.className = "card-body";
+
+          if (v.notes) {
+            const notesEl = document.createElement("p");
+            notesEl.textContent = v.notes;
+            body.appendChild(notesEl);
+          }
+
+          if (Array.isArray(v.tags) && v.tags.length > 0) {
+            const tagsRow = document.createElement("div");
+            tagsRow.className = "tag-row";
+            v.tags.forEach((tag) => {
+              const span = document.createElement("span");
+              span.className = "tag";
+              span.textContent = tag;
+              tagsRow.appendChild(span);
+            });
+            body.appendChild(tagsRow);
+          }
+
+          if (v.wifi) {
+            const wifiEl = document.createElement("div");
+            wifiEl.className = "meta";
+            wifiEl.textContent = v.wifi;
+            body.appendChild(wifiEl);
+          }
+
+          const footer = document.createElement("div");
+          footer.className = "card-footer-row";
+
+          const btnDetail = document.createElement("button");
+          btnDetail.className = "btn-sm";
+          btnDetail.textContent = "Detay / Yorum";
+          btnDetail.onclick = () => {
+            alert(
+              `${v.name}\n\nPuan: ${v.rating.toFixed(1)} (${v.votes} oy)\nBölge: ${
+                v.district
+              }\n\nNot: ${v.notes}`
+            );
+          };
+
+          const btnRate = document.createElement("button");
+          btnRate.className = "btn-sm primary";
+          btnRate.textContent = "Puan Ver";
+          btnRate.onclick = () => {
+            alert(
+              `${v.name} için puan verme ekranı (demo).\n\nGerçek sistemde kullanıcı login + rating / yorum akışı açılacak.`
+            );
+          };
+
+          footer.appendChild(btnDetail);
+          footer.appendChild(btnRate);
+
+          card.appendChild(headerRow);
+          card.appendChild(body);
+          card.appendChild(footer);
+
+          venueList.appendChild(card);
+        });
       }
 
-      if (v.wifi) {
-        const wifiEl = document.createElement('div');
-        wifiEl.className = 'meta';
-        wifiEl.textContent = v.wifi;
-        body.appendChild(wifiEl);
+      // --- SUPABASE'TEN VERİ ÇEK ---
+
+      async function loadVenues() {
+        try {
+          const { data, error } = await supabaseClient.from("venues").select("*");
+          if (error) {
+            console.error("Supabase error:", error);
+            renderVenueCards([]);
+            return;
+          }
+
+          console.log("Supabase Data:", data);
+          venuesCache = (data || []).map(mapRowToVenue);
+          renderVenueCards(venuesCache);
+        } catch (err) {
+          console.error("Beklenmeyen hata:", err);
+          renderVenueCards([]);
+        }
       }
 
-      const footer = document.createElement('div');
-      footer.className = 'card-footer-row';
+      // --- FİLTRE BUTONLARI ---
 
-      const btnDetail = document.createElement('button');
-      btnDetail.className = 'btn-sm';
-      btnDetail.textContent = 'Detay / Yorum';
-      btnDetail.onclick = () => {
-        alert(
-          `${v.name}\n\nPuan: ${v.rating.toFixed(1)} (${v.votes} oy)\nBölge: ${v.district}\n\nNot: ${v.notes}`
+      filterButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          filterButtons.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          activeDistrict = btn.dataset.district || "all";
+          renderVenueCards(venuesCache);
+        });
+      });
+
+      // --- MOD (Müşteri / İşletme) BUTONLARI ---
+
+      modeButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          modeButtons.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+
+          const mode = btn.dataset.mode;
+          if (mode === "customer") {
+            customerPanel.style.display = "";
+            businessPanel.style.display = "none";
+          } else {
+            customerPanel.style.display = "none";
+            businessPanel.style.display = "";
+          }
+        });
+      });
+
+      // --- GEOLOCATION BİLGİ METNİ (demo) ---
+
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          () => {
+            distanceNote.textContent =
+              "📍 Konum izni aktif. Bu demo sürümde yaklaşık mesafe sabit, gerçek sistemde gerçek lokasyona göre sıralanacaktır.";
+          },
+          () => {
+            distanceNote.textContent =
+              "📍 Konum izni verilmedi. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.";
+          }
         );
-      };
-
-      const btnRate = document.createElement('button');
-      btnRate.className = 'btn-sm primary';
-      btnRate.textContent = 'Puan Ver';
-      btnRate.onclick = () => {
-        alert(
-          `${v.name} için puan verme ekranı (demo).\nGerçek sistemde kullanıcı login + rating / yorum akışı açılacak.`
-        );
-      };
-
-      footer.appendChild(btnDetail);
-      footer.appendChild(btnRate);
-
-      card.appendChild(headerRow);
-      card.appendChild(body);
-      card.appendChild(footer);
-
-      venueList.appendChild(card);
-    });
-  }
-
-  // --- SUPABASE'TEN VERİ ÇEK ---
-
-  async function loadVenues() {
-    try {
-      const { data, error } = await supabaseClient.from('venues').select('*');
-      if (error) {
-        console.error('Supabase error:', error);
-        renderVenueCards([]);
-        return;
-      }
-
-      console.log('Supabase Data:', data);
-      venuesCache = (data || []).map(mapRowToVenue);
-      renderVenueCards(venuesCache);
-    } catch (err) {
-      console.error('Beklenmeyen hata:', err);
-      renderVenueCards([]);
-    }
-  }
-
-  // --- FİLTRE BUTONLARI ---
-
-  filterButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      filterButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeDistrict = btn.dataset.district || 'all';
-      renderVenueCards(venuesCache);
-    });
-  });
-
-  // --- MOD (Müşteri / İşletme) BUTONLARI ---
-
-  modeButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      modeButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const mode = btn.dataset.mode;
-      if (mode === 'customer') {
-        customerPanel.classList.add('active');
-        businessPanel.classList.remove('active');
       } else {
-        customerPanel.classList.remove('active');
-        businessPanel.classList.add('active');
-      }
-    });
-  });
-
-  // --- GEOLOCATION BİLGİ METNİ (mesafeyi hesaplamıyoruz, sadece bilgilendirme) ---
-
-  if ('geolocation' in navigator) {
-    navigator.geolocation.getCurrentPosition(
-      () => {
         distanceNote.textContent =
-          '📍 Konum izni aktif. Bu demo sürümde yaklaşık mesafe sabit, gerçek sistemde gerçek lokasyona göre sıralanacaktır.';
-      },
-      () => {
-        distanceNote.textContent =
-          '📍 Konum izni verilmedi. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.';
+          "📍 Tarayıcınız konum desteği sunmuyor. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.";
       }
-    );
-  } else {
-    distanceNote.textContent =
-      '📍 Tarayıcınız konum desteği sunmuyor. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.';
-  }
 
-  // --- İNİT ---
+      // --- İŞLETME FORMU (şimdilik sadece console.log) ---
 
-  loadVenues();
-</script>
+      bizForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(bizForm);
+        const payload = Object.fromEntries(formData.entries());
+        console.log("İşletme başvurusu (demo):", payload);
+        alert(
+          "Başvurunuz demo ortamında alındı. Global lansman aşamasında Coffee Box ekibi sizinle iletişime geçecek."
+        );
+        bizForm.reset();
+      });
+
+      // --- INIT ---
+
+      loadVenues();
+    </script>
+  </body>
+</html>
