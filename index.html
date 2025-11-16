@@ -1005,15 +1005,19 @@
 </body>
 </html>
 <script>
-const supabaseUrl = 'https://girurtvcbudkjrvfjdte.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpcnVydHZjYnVka2pydmZqZHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzMDA1ODksImV4cCI6MjA3ODg3NjU4OX0.n2Q9bvirUMIFgH1l4G7prZHCvr1wxwzrSGZw9OCUJ9A';
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+  const supabaseUrl = 'https://girurtvcbudkjrvfjdte.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpcnVydHZjYnVka2pydmZqZHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzMDA1ODksImV4cCI6MjA3ODg3NjU4OX0.n2Q9bvirUMIFgH1l4G7prZHCvr1wxwzrSGZw9OCUJ9A';
 
-// Test: venues tablosundan verileri çek
-async function loadVenues() {
-  const { data, error } = await supabase.from('venues').select('*');
-  console.log('Supabase Data:', data);
-  if (error) console.error('Supabase error:', error);
-}
-loadVenues();
+  // CDN'den gelen global supabase objesinden createClient'i al
+  const { createClient } = window.supabase;
+  const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+  // Test: venues tablosundan verileri çek
+  async function loadVenues() {
+    const { data, error } = await supabaseClient.from('venues').select('*');
+    console.log('Supabase Data:', data);
+    if (error) console.error('Supabase error:', error);
+  }
+
+  loadVenues();
 </script>
