@@ -1005,6 +1005,7 @@
 </body>
 </html>
 <script>
+  // Supabase ayarları
   const supabaseUrl = 'https://girurtvcbudkjrvfjdte.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpcnVydHZjYnVka2pydmZqZHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzMDA1ODksImV4cCI6MjA3ODg3NjU4OX0.n2Q9bvirUMIFgH1l4G7prZHCvr1wxwzrSGZw9OCUJ9A';
 
@@ -1012,23 +1013,43 @@
   const { createClient } = window.supabase;
   const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
-  // venues tablosundan verileri çek
+  // Supabase'ten venues tablosunu oku
   async function loadVenues() {
-    const { data, error } = await supabaseClient.from('venues').select('*');
-    console.log('Supabase Data:', data);
+    const { data, error } = await supabaseClient
+      .from('venues')
+      .select('*')
+      .order('id', { ascending: true });
+
     if (error) {
       console.error('Supabase error:', error);
       return;
     }
 
-    // ✅ Artık veri geldiyse burada kartları çiziyoruz
+    console.log('Supabase Data:', data);
     renderVenueCards(data);
   }
 
   function renderVenueCards(data) {
-    const venueList = document.querySelector('.venue-list');
-    venueList.innerHTML = ''; // Eski statik kartları temizle
+    // Önce .venue-list var mı diye bak
+    let venueList = document.querySelector('.venue-list');
 
+    // Yoksa, ilk .venue-card'ın parent'ını kullan
+    if (!venueList) {
+      const firstCard = document.querySelector('.venue-card');
+      if (firstCard && firstCard.parentElement) {
+        venueList = firstCard.parentElement;
+      } else {
+        // O da yoksa, body içine yeni bir container oluştur
+        venueList = document.createElement('div');
+        venueList.className = 'venue-list';
+        document.body.appendChild(venueList);
+      }
+    }
+
+    // Eski içeriği temizle
+    venueList.innerHTML = '';
+
+    // Supabase'ten gelen her venue için kart oluştur
     data.forEach((venue) => {
       const div = document.createElement('div');
       div.className = 'venue-card';
