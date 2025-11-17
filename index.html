@@ -624,329 +624,365 @@
     </div>
 
     <!-- APP SCRIPT (TEK BLOK) -->
-    <script>
-      // --- SUPABASE AYARLARI ---
-      const supabaseUrl = "https://girurtvcbudkjrvfjdte.supabase.co";
-      const supabaseKey =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpcnVydHZjYnVka2pydmZqZHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzMDA1ODksImV4cCI6MjA3ODg3NjU4OX0.n2Q9bvirUMIFgH1l4G7prZHCvr1wxwzrSGZw9OCUJ9A";
+   <script>
+  // --- SUPABASE AYARLARI ---
+  const supabaseUrl = 'https://girurtvcbudkjrvfjdte.supabase.co';
+  const supabaseKey =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpcnVydHZjYnVka2pydmZqZHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzMDA1ODksImV4cCI6MjA3ODg3NjU4OX0.n2Q9bvirUMIFgH1l4G7prZHCvr1wxwzrSGZw9OCUJ9A';
 
-      const { createClient } = window.supabase;
-      const supabaseClient = createClient(supabaseUrl, supabaseKey);
+  const { createClient } = window.supabase;
+  const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
-      // --- STATE & DOM ---
-      const venueList = document.getElementById("venueList");
-      const filterButtons = document.querySelectorAll(".filter-pill");
-      const distanceNote = document.getElementById("distanceNote");
-      const modeButtons = document.querySelectorAll(".mode-btn");
-      const customerPanel = document.getElementById("customerPanel");
-      const businessPanel = document.getElementById("businessPanel");
-      const bizForm = document.getElementById("businessForm");
-      const bizList = document.getElementById("bizList");
+  // --- STATE & DOM ---
+  const venueList = document.getElementById('venueList');
+  const filterButtons = document.querySelectorAll('.filter-pill');
+  const distanceNote = document.getElementById('distanceNote');
+  const modeButtons = document.querySelectorAll('.mode-btn');
+  const customerPanel = document.getElementById('customerPanel');
+  const businessPanel = document.getElementById('businessPanel');
+  const bizForm = document.getElementById('businessForm');
+  const bizList = document.getElementById('bizList');
 
-      let activeDistrict = "all";
-      let venuesCache = [];
+  let activeDistrict = 'all';
+  let venuesCache = [];
 
-      // --- VENUE MAP ---
-      function mapRowToVenue(row) {
-        return {
-          id: row.id,
-          name: row.name,
-          district: row.district || "Bodrum Merkez",
-          rating: typeof row.rating === "number" ? row.rating : 0,
-          votes: typeof row.votes === "number" ? row.votes : 0,
-          priceLevel:
-            row.pricelevel ??
-            row.price_level ??
-            row.price ??
-            row.priceLevel ??
-            2,
-          tags: row.tags ?? [],
-          notes: row.notes || row.description || "",
-          wifi: row.wifi || "",
-          approxDistance: row.approx_distance ?? row.distance_km ?? 0,
-        };
+  // --- SUPABASE ROW → FRONTEND NESNE ---
+  function mapRowToVenue(row) {
+    return {
+      id: row.id,
+      name: row.name,
+      district: row.district || 'Bodrum Merkez',
+      rating: typeof row.rating === 'number' ? row.rating : 0,
+      votes: typeof row.votes === 'number' ? row.votes : 0,
+      priceLevel:
+        row.pricelevel ?? row.price_level ?? row.price ?? row.priceLevel ?? 2,
+      tags: row.tags ?? [],
+      notes: row.notes || row.description || '',
+      wifi: row.wifi || '',
+      approxDistance: row.approx_distance ?? row.distance_km ?? 0,
+    };
+  }
+
+  // --- KART ÇİZİMİ ---
+  function renderVenueCards(data) {
+    if (!venueList) {
+      console.error('venueList elementi bulunamadı');
+      return;
+    }
+
+    venueList.innerHTML = '';
+
+    const filtered = data.filter((v) => {
+      if (activeDistrict === 'all') return true;
+      return (v.district || '').toLowerCase() === activeDistrict.toLowerCase();
+    });
+
+    if (filtered.length === 0) {
+      venueList.innerHTML =
+        '<p>Bu bölge için henüz kayıtlı kahve mekanı yok.</p>';
+      return;
+    }
+
+    filtered.forEach((v) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      const headerRow = document.createElement('div');
+      headerRow.className = 'card-header-row';
+
+      const left = document.createElement('div');
+      left.className = 'card-header-left';
+
+      const nameEl = document.createElement('h3');
+      nameEl.textContent = v.name;
+      left.appendChild(nameEl);
+
+      const districtEl = document.createElement('div');
+      districtEl.className = 'meta';
+      districtEl.textContent = v.district || '';
+      left.appendChild(districtEl);
+
+      const distanceEl = document.createElement('div');
+      distanceEl.className = 'meta';
+      if (v.approxDistance) {
+        distanceEl.textContent = `~${v.approxDistance.toFixed(
+          1
+        )} km tahmini mesafe`;
+      }
+      left.appendChild(distanceEl);
+
+      const right = document.createElement('div');
+      right.className = 'card-header-right';
+      right.textContent = `${v.rating.toFixed(1)}  •  ${v.votes} oy`;
+
+      headerRow.appendChild(left);
+      headerRow.appendChild(right);
+
+      const body = document.createElement('div');
+      body.className = 'card-body';
+
+      if (v.notes) {
+        const notesEl = document.createElement('p');
+        notesEl.textContent = v.notes;
+        body.appendChild(notesEl);
       }
 
-      // --- VENUE CARD RENDER ---
-      function renderVenueCards(data) {
-        if (!venueList) return;
-
-        venueList.innerHTML = "";
-
-        const filtered = data.filter((v) => {
-          if (activeDistrict === "all") return true;
-          return (v.district || "").toLowerCase() ===
-            activeDistrict.toLowerCase();
+      if (Array.isArray(v.tags) && v.tags.length > 0) {
+        const tagsRow = document.createElement('div');
+        tagsRow.className = 'tag-row';
+        v.tags.forEach((tag) => {
+          const span = document.createElement('span');
+          span.className = 'tag';
+          span.textContent = tag;
+          tagsRow.appendChild(span);
         });
-
-        if (filtered.length === 0) {
-          venueList.innerHTML =
-            "<p>Bu bölge için henüz kayıtlı kahve mekanı yok.</p>";
-          return;
-        }
-
-        filtered.forEach((v) => {
-          const card = document.createElement("div");
-          card.className = "card";
-
-          const headerRow = document.createElement("div");
-          headerRow.className = "card-header-row";
-
-          const left = document.createElement("div");
-          left.className = "card-header-left";
-
-          const nameEl = document.createElement("h3");
-          nameEl.textContent = v.name;
-          left.appendChild(nameEl);
-
-          const districtEl = document.createElement("div");
-          districtEl.className = "meta";
-          districtEl.textContent = v.district || "";
-          left.appendChild(districtEl);
-
-          const distanceEl = document.createElement("div");
-          distanceEl.className = "meta";
-          if (v.approxDistance) {
-            distanceEl.textContent = `~${v.approxDistance.toFixed(
-              1
-            )} km tahmini mesafe`;
-          }
-          left.appendChild(distanceEl);
-
-          const right = document.createElement("div");
-          right.className = "card-header-right";
-          right.textContent = `${v.rating.toFixed(1)}  •  ${v.votes} oy`;
-
-          headerRow.appendChild(left);
-          headerRow.appendChild(right);
-
-          const body = document.createElement("div");
-          body.className = "card-body";
-
-          if (v.notes) {
-            const notesEl = document.createElement("p");
-            notesEl.textContent = v.notes;
-            body.appendChild(notesEl);
-          }
-
-          if (Array.isArray(v.tags) && v.tags.length > 0) {
-            const tagsRow = document.createElement("div");
-            tagsRow.className = "tag-row";
-            v.tags.forEach((tag) => {
-              const span = document.createElement("span");
-              span.className = "tag";
-              span.textContent = tag;
-              tagsRow.appendChild(span);
-            });
-            body.appendChild(tagsRow);
-          }
-
-          if (v.wifi) {
-            const wifiEl = document.createElement("div");
-            wifiEl.className = "meta";
-            wifiEl.textContent = v.wifi;
-            body.appendChild(wifiEl);
-          }
-
-          const footer = document.createElement("div");
-          footer.className = "card-footer-row";
-
-          const btnDetail = document.createElement("button");
-          btnDetail.className = "btn-sm";
-          btnDetail.textContent = "Detay / Yorum";
-          btnDetail.onclick = () => {
-            alert(
-              `${v.name}\n\nPuan: ${v.rating.toFixed(1)} (${v.votes} oy)\nBölge: ${
-                v.district
-              }\n\nNot: ${v.notes}`
-            );
-          };
-
-          const btnRate = document.createElement("button");
-          btnRate.className = "btn-sm primary";
-          btnRate.textContent = "Puan Ver";
-          btnRate.onclick = () => {
-            alert(
-              `${v.name} için puan verme ekranı (demo).\n\nGerçek sistemde kullanıcı login + rating / yorum akışı açılacak.`
-            );
-          };
-
-          footer.appendChild(btnDetail);
-          footer.appendChild(btnRate);
-
-          card.appendChild(headerRow);
-          card.appendChild(body);
-          card.appendChild(footer);
-
-          venueList.appendChild(card);
-        });
+        body.appendChild(tagsRow);
       }
 
-      // --- SUPABASE'TEN MEKANLARI ÇEK ---
-      async function loadVenues() {
-        try {
-          const { data, error } = await supabaseClient.from("venues").select("*");
-          if (error) {
-            console.error("Supabase error:", error);
-            renderVenueCards([]);
-            return;
-          }
-
-          console.log("Supabase Data (venues):", data);
-          venuesCache = (data || []).map(mapRowToVenue);
-          renderVenueCards(venuesCache);
-        } catch (err) {
-          console.error("Beklenmeyen hata:", err);
-          renderVenueCards([]);
-        }
+      if (v.wifi) {
+        const wifiEl = document.createElement('div');
+        wifiEl.className = 'meta';
+        wifiEl.textContent = v.wifi;
+        body.appendChild(wifiEl);
       }
 
-      // --- İŞLETME BAŞVURUSU KAYDET ---
-      async function addBusinessApplication(payload) {
-        const { data, error } = await supabaseClient
-          .from("business_applications")
-          .insert([payload])
-          .select();
+      const footer = document.createElement('div');
+      footer.className = 'card-footer-row';
 
-        if (error) {
-          console.error("İşletme başvurusu kaydedilemedi:", error);
-          throw error;
-        }
-
-        return data;
-      }
-
-      // --- İŞLETME BAŞVURULARINI LİSTELE ---
-      function renderBusinessApplications(applications) {
-        if (!bizList) return;
-
-        if (!applications.length) {
-          bizList.innerHTML = "<p>Henüz başvuru yok.</p>";
-          return;
-        }
-
-        bizList.innerHTML = "";
-
-        applications.forEach((app) => {
-          const row = document.createElement("div");
-          row.className = "biz-item";
-
-          row.innerHTML = `
-            <div>
-              <span class="name">${app.name || "-"}</span>
-              <span class="district"> • ${app.district || ""}</span>
-            </div>
-            <div>
-              <span>${app.email || ""}</span>
-              <span style="margin-left:8px; font-weight:600;">${
-                app.status || ""
-              }</span>
-            </div>
-          `;
-
-          bizList.appendChild(row);
-        });
-      }
-
-      async function loadBusinessApplications() {
-        if (!bizList) return;
-
-        const { data, error } = await supabaseClient
-          .from("business_applications")
-          .select("*")
-          .order("created_at", { ascending: false });
-
-        if (error) {
-          console.error("Başvurular alınamadı:", error);
-          bizList.innerHTML =
-            "<p>Başvurular yüklenirken hata oluştu.</p>";
-          return;
-        }
-
-        console.log("Supabase Data (business_applications):", data);
-        renderBusinessApplications(data || []);
-      }
-
-      // --- FİLTRE BUTONLARI ---
-      filterButtons.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          filterButtons.forEach((b) => b.classList.remove("active"));
-          btn.classList.add("active");
-          activeDistrict = btn.dataset.district || "all";
-          renderVenueCards(venuesCache);
-        });
-      });
-
-      // --- MOD (Müşteri / İşletme) BUTONLARI ---
-      modeButtons.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          modeButtons.forEach((b) => b.classList.remove("active"));
-          btn.classList.add("active");
-
-          const mode = btn.dataset.mode;
-          if (mode === "customer") {
-            customerPanel.style.display = "";
-            businessPanel.style.display = "none";
-          } else {
-            customerPanel.style.display = "none";
-            businessPanel.style.display = "";
-          }
-        });
-      });
-
-      // --- GEOLOCATION MESAJI (demo) ---
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          () => {
-            distanceNote.textContent =
-              "📍 Konum izni aktif. Bu demo sürümde yaklaşık mesafe sabit, gerçek sistemde gerçek lokasyona göre sıralanacaktır.";
-          },
-          () => {
-            distanceNote.textContent =
-              "📍 Konum izni verilmedi. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.";
-          }
+      const btnDetail = document.createElement('button');
+      btnDetail.className = 'btn-sm';
+      btnDetail.textContent = 'Detay / Yorum';
+      btnDetail.onclick = () => {
+        alert(
+          `${v.name}\n\nPuan: ${v.rating.toFixed(1)} (${v.votes} oy)\nBölge: ${
+            v.district
+          }\n\nNot: ${v.notes}`
         );
+      };
+
+      const btnRate = document.createElement('button');
+      btnRate.className = 'btn-sm primary';
+      btnRate.textContent = 'Puan Ver';
+      btnRate.onclick = () => {
+        submitVenueRating(v);
+      };
+
+      footer.appendChild(btnDetail);
+      footer.appendChild(btnRate);
+
+      card.appendChild(headerRow);
+      card.appendChild(body);
+      card.appendChild(footer);
+
+      venueList.appendChild(card);
+    });
+  }
+
+  // --- MÜŞTERİ PUAN KAYDI ---
+  async function submitVenueRating(venue) {
+    const ratingStr = prompt(
+      `${venue.name} için 1–5 arası bir puan verin:`
+    );
+    if (!ratingStr) return;
+
+    const ratingVal = Number(String(ratingStr).replace(',', '.'));
+    if (!Number.isFinite(ratingVal) || ratingVal < 1 || ratingVal > 5) {
+      alert('Lütfen 1 ile 5 arasında bir sayı girin.');
+      return;
+    }
+
+    const comment =
+      prompt(
+        'İsterseniz kısa bir yorum yazın (boş bırakabilirsiniz):'
+      ) || '';
+
+    try {
+      const { error } = await supabaseClient
+        .from('venue_ratings')
+        .insert([
+          {
+            venue_id: venue.id,
+            rating: ratingVal,
+            comment,
+          },
+        ]);
+
+      if (error) {
+        console.error('Puan kaydedilemedi:', error);
+        alert(
+          'Puan kaydedilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.'
+        );
+        return;
+      }
+
+      alert('Teşekkürler! Puanınız kaydedildi.');
+    } catch (err) {
+      console.error(err);
+      alert('Beklenmeyen bir hata oluştu.');
+    }
+  }
+
+  // --- SUPABASE'TEN MEKAN VERİSİ ÇEK ---
+  async function loadVenues() {
+    try {
+      const { data, error } = await supabaseClient.from('venues').select('*');
+      if (error) {
+        console.error('Supabase error:', error);
+        renderVenueCards([]);
+        return;
+      }
+
+      console.log('Supabase Data (venues):', data);
+      venuesCache = (data || []).map(mapRowToVenue);
+      renderVenueCards(venuesCache);
+    } catch (err) {
+      console.error('Beklenmeyen hata:', err);
+      renderVenueCards([]);
+    }
+  }
+
+  // --- İŞLETME BAŞVURUSU YARDIMCI FONKSİYONLARI ---
+  async function addBusinessApplication(payload) {
+    const { data, error } = await supabaseClient
+      .from('business_applications')
+      .insert([payload]);
+
+    if (error) {
+      console.error('İşletme başvurusu kaydedilemedi:', error);
+      throw error;
+    }
+
+    return data;
+  }
+
+  async function fetchBusinessApplications() {
+    const { data, error } = await supabaseClient
+      .from('business_applications')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Başvurular alınamadı:', error);
+      return [];
+    }
+
+    return data || [];
+  }
+
+  function renderBusinessApplications(applications) {
+    if (!bizList) return;
+
+    if (!applications.length) {
+      bizList.innerHTML = '<p>Henüz başvuru yok.</p>';
+      return;
+    }
+
+    bizList.innerHTML = '';
+
+    applications.forEach((app) => {
+      const row = document.createElement('div');
+      row.className = 'biz-row';
+
+      row.innerHTML = `
+        <div class="biz-row-main">
+          <strong>${app.name || '-'}</strong>
+          <span>${app.district || ''}</span>
+        </div>
+        <div class="biz-row-meta">
+          <span>${app.contact_name || ''}</span>
+          <span>${app.email || ''}</span>
+          <span class="biz-status">${app.status || ''}</span>
+        </div>
+      `;
+
+      bizList.appendChild(row);
+    });
+  }
+
+  async function loadBusinessApplications() {
+    const apps = await fetchBusinessApplications();
+    renderBusinessApplications(apps);
+  }
+
+  // --- FİLTRE BUTONLARI ---
+  filterButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      filterButtons.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeDistrict = btn.dataset.district || 'all';
+      renderVenueCards(venuesCache);
+    });
+  });
+
+  // --- MOD (Müşteri / İşletme) BUTONLARI ---
+  modeButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      modeButtons.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const mode = btn.dataset.mode;
+      if (mode === 'customer') {
+        customerPanel.style.display = '';
+        businessPanel.style.display = 'none';
       } else {
+        customerPanel.style.display = 'none';
+        businessPanel.style.display = '';
+      }
+    });
+  });
+
+  // --- GEOLOCATION BİLGİ METNİ (demo) ---
+  if ('geolocation' in navigator && distanceNote) {
+    navigator.geolocation.getCurrentPosition(
+      () => {
         distanceNote.textContent =
-          "📍 Tarayıcınız konum desteği sunmuyor. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.";
+          'Konum izni aktif. Bu demo sürümde yaklaşık mesafe sabit, gerçek sistemde gerçek lokasyona göre sıralanacaktır.';
+      },
+      () => {
+        distanceNote.textContent =
+          'Konum izni verilmedi. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.';
       }
+    );
+  } else if (distanceNote) {
+    distanceNote.textContent =
+      'Tarayıcınız konum desteği sunmuyor. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.';
+  }
 
-      // --- İŞLETME FORMU SUBMIT ---
-      if (bizForm) {
-        bizForm.addEventListener("submit", async (event) => {
-          event.preventDefault();
+  // --- İŞLETME FORMU SUBMIT ---
+  if (bizForm) {
+    bizForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-          const formData = new FormData(bizForm);
-          const payload = {
-            name: formData.get("name"),
-            district: formData.get("district"),
-            email: formData.get("email"),
-            notes: formData.get("notes"),
-            status: "pending",
-          };
+      const formData = new FormData(bizForm);
+      const payload = {
+        name: formData.get('name'),
+        district: formData.get('district'),
+        email: formData.get('email'),
+        notes: formData.get('notes'),
+        status: 'pending',
+      };
 
-          console.log("İşletme başvurusu (giden payload):", payload);
+      console.log('İşletme başvurusu (giden payload):', payload);
 
-          try {
-            const saved = await addBusinessApplication(payload);
-            console.log("İşletme başvurusu kaydedildi:", saved);
-            alert(
-              "Başvurunuz alındı! Demo sürümdeyiz; Coffee Box ekibi başvurunuzu değerlendirecek."
-            );
-            bizForm.reset();
-            await loadBusinessApplications();
-          } catch (err) {
-            console.error(err);
-            alert(
-              "Başvuru kaydedilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin."
-            );
-          }
-        });
+      try {
+        await addBusinessApplication(payload);
+        alert(
+          'Başvurunuz alındı! Demo sürümdeyiz; Coffee Box ekibi başvurunuzu değerlendirecek.'
+        );
+        bizForm.reset();
+        await loadBusinessApplications();
+      } catch (error) {
+        console.error(error);
+        alert(
+          'Başvuru kaydedilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.'
+        );
       }
+    });
+  }
 
-      // --- INIT ---
-      loadVenues();
-      loadBusinessApplications();
-    </script>
+  // --- INIT ---
+  loadVenues();
+  loadBusinessApplications();
+</script>
   </body>
 </html>
