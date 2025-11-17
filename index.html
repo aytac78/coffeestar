@@ -935,39 +935,95 @@ const customerPanel = document.getElementById('customerPanel');
 const businessPanel = document.getElementById('businessPanel');
 const bizForm = document.getElementById('businessForm');
 const bizList = document.getElementById('bizList');
+// ---- İŞLETME BAŞVURU LİSTESİ (ADMIN) ----
 
+// Supabase'ten başvuru listesini çeker
+async function fetchBusinessApplications() {
+  const { data, error } = await supabaseClient
+    .from('business_applications')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Başvurular alınamadı:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+// Çekilen başvuruları sayfadaki #bizList içine yazar
+function renderBusinessApplications(applications) {
+  if (!bizList) return;
+
+  if (!applications.length) {
+    bizList.innerHTML = '<p>Henüz başvuru yok.</p>';
+    return;
+  }
+
+  bizList.innerHTML = '';
+
+  applications.forEach((app) => {
+    const row = document.createElement('div');
+    row.className = 'biz-row';
+
+    row.innerHTML = `
+      <div class="biz-row-main">
+        <strong>${app.name || '-'}</strong>
+        <span>${app.district || ''}</span>
+      </div>
+      <div class="biz-row-meta">
+        <span>${app.contact_name || ''}</span>
+        <span>${app.email || ''}</span>
+        <span class="biz-status">${app.status || ''}</span>
+      </div>
+    `;
+
+    bizList.appendChild(row);
+  });
+}
+
+// Tek fonksiyon: önce veriyi çeker, sonra ekrana basar
+async function loadBusinessApplications() {
+  const apps = await fetchBusinessApplications();
+  renderBusinessApplications(apps);
+}
 let activeDistrict = 'all';
 let venuesCache = [];
 // --- İŞLETME BAŞVURU FORMU ---
 
+// ---- İŞLETME BAŞVURU FORMU ----
 if (bizForm) {
   bizForm.addEventListener('submit', async (event) => {
-    event.preventDefault(); // sayfanın yeniden yüklenmesini engelle
+    event.preventDefault(); // sayfanın yenilenmesini engelle
 
     const formData = new FormData(bizForm);
 
-    // Formdaki input name'leri ile Supabase kolonlarını eşliyoruz
-  const payload = {
-  name:         formData.get('name'),
-  district:     formData.get('district'),
-  address:      formData.get('address'),
-  contact_name: formData.get('contact_name'), // input name="contact_name" olmalı
-  phone:        formData.get('phone'),
-  email:        formData.get('email'),
-  instagram:    formData.get('instagram'),
-  notes:        formData.get('notes'),
-  status:       'pending', // yeni başvuru beklemede
-};
+    const payload = {
+      name:         formData.get('name'),
+      district:     formData.get('district'),
+      address:      formData.get('address'),
+      contact_name: formData.get('contact_name'),
+      phone:        formData.get('phone'),
+      email:        formData.get('email'),
+      instagram:    formData.get('instagram'),
+      notes:        formData.get('notes'),
+      status:       'pending', // yeni başvurular "pending" başlasın
+    };
 
     try {
       await addBusinessApplication(payload);
-      alert('Başvurunuz alındı, teşekkürler!');
-
-      bizForm.reset(); // formu temizle
-    } catch (err) {
-      alert('Bir hata oluştu, lütfen tekrar deneyin.');
+      bizForm.reset();
+      alert('Başvurunuz kaydedildi, teşekkür ederiz!');
+      await loadBusinessApplications(); // yeni kayıt eklensin
+    } catch (error) {
+      console.error(error);
+      alert('Başvuru kaydedilirken hata oluştu.');
     }
   });
+
+  // Sayfa açıldığında mevcut başvuruları yükle
+  loadBusinessApplications();
 }
   let activeDistrict = 'all'
   let venuesCache = []
