@@ -465,9 +465,117 @@
         font-weight: 600;
         color: #0f172a;
       }
+            /* RATING MODAL */
+
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.35);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 40;
+      }
+
+      .modal-backdrop.active {
+        display: flex;
+      }
+
+      .modal {
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 16px 18px 14px;
+        width: min(380px, 90vw);
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.3);
+        font-size: 12px;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .modal-title {
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      .modal-close {
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      .modal-body {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .modal-actions {
+        margin-top: 10px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .btn-ghost {
+        border-radius: 999px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        font-size: 12px;
+        padding: 6px 14px;
+        cursor: pointer;
+      }
     </style>
   </head>
-
+    <!-- PUANLAMA MODALI -->
+    <div id="ratingModal" class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-title" id="ratingModalTitle">Mekan Puanla</div>
+          <button
+            type="button"
+            class="modal-close"
+            id="ratingModalClose"
+            aria-label="Kapat"
+          >
+            ×
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-field">
+            <label for="ratingSelect">Puanınız</label>
+            <select id="ratingSelect" required>
+              <option value="5">5 – Harika</option>
+              <option value="4">4 – Çok iyi</option>
+              <option value="3">3 – Ortalama</option>
+              <option value="2">2 – Zayıf</option>
+              <option value="1">1 – Kötü</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="ratingComment">Yorum (isteğe bağlı)</label>
+            <textarea
+              id="ratingComment"
+              placeholder="Kahve, ortam, Wi-Fi vb. hakkında görüşünüz..."
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" id="ratingModalCancel">
+            Vazgeç
+          </button>
+          <button type="button" class="btn-main" id="ratingModalSubmit">
+            Gönder
+          </button>
+        </div>
+      </div>
+    </div>
   <body>
     <div class="app-shell">
       <!-- HEADER -->
@@ -644,12 +752,21 @@
   const bizForm = document.getElementById('businessForm');
   const bizList = document.getElementById('bizList');
 
+  // Rating modal DOM
+  const ratingModal = document.getElementById('ratingModal');
+  const ratingModalTitle = document.getElementById('ratingModalTitle');
+  const ratingSelect = document.getElementById('ratingSelect');
+  const ratingComment = document.getElementById('ratingComment');
+  const ratingModalClose = document.getElementById('ratingModalClose');
+  const ratingModalCancel = document.getElementById('ratingModalCancel');
+  const ratingModalSubmit = document.getElementById('ratingModalSubmit');
+
   let activeDistrict = 'all';
   let venuesCache = [];
+  let activeVenueForRating = null;
 
   // --- YARDIMCI FONKSİYONLAR ---
 
-  // Supabase "venues" satırını frontend için normalize ediyoruz
   function mapRowToVenue(row) {
     return {
       id: row.id,
@@ -666,7 +783,6 @@
     };
   }
 
-  // Bir kahve mekanını kart olarak çiziyoruz
   function renderVenueCards(data) {
     if (!venueList) {
       console.error('venueList elementi bulunamadı');
@@ -690,7 +806,6 @@
       const card = document.createElement('div');
       card.className = 'card';
 
-      // HEADER
       const headerRow = document.createElement('div');
       headerRow.className = 'card-header-row';
 
@@ -722,7 +837,6 @@
       headerRow.appendChild(left);
       headerRow.appendChild(right);
 
-      // BODY
       const body = document.createElement('div');
       body.className = 'card-body';
 
@@ -751,7 +865,6 @@
         body.appendChild(wifiEl);
       }
 
-      // FOOTER (Butonlar)
       const footer = document.createElement('div');
       footer.className = 'card-footer-row';
 
@@ -769,28 +882,7 @@
       const btnRate = document.createElement('button');
       btnRate.className = 'btn-sm primary';
       btnRate.textContent = 'Puan Ver';
-      btnRate.onclick = async () => {
-        const valueStr = prompt(
-          `${v.name} için 1–5 arasında bir puan verin:`,
-          '5'
-        );
-        if (!valueStr) return;
-
-        const value = Number(valueStr);
-        if (!value || value < 1 || value > 5) {
-          alert('Lütfen 1 ile 5 arasında bir sayı girin.');
-          return;
-        }
-
-        try {
-          await addVenueRating(v.id, value, null);
-          alert('Puanınız kaydedildi, teşekkür ederiz!');
-          await loadVenues(); // ortalamayı güncelle
-        } catch (error) {
-          console.error(error);
-          alert('Puan kaydedilirken bir hata oluştu.');
-        }
-      };
+      btnRate.onclick = () => openRatingModal(v);
 
       footer.appendChild(btnDetail);
       footer.appendChild(btnRate);
@@ -803,11 +895,10 @@
     });
   }
 
-  // --- SUPABASE: VENUES + RATING ORTALAMALARI ---
+  // --- SUPABASE: VENUES + OY ORTALAMALARI ---
 
   async function loadVenues() {
     try {
-      // 1) Mekanları çek
       const { data: venuesData, error: venuesError } = await supabaseClient
         .from('venues')
         .select('*');
@@ -818,17 +909,14 @@
         return;
       }
 
-      // 2) Oyları çek (venue_ratings)
       const { data: ratingsData, error: ratingsError } = await supabaseClient
         .from('venue_ratings')
         .select('venue_id, rating');
 
       if (ratingsError) {
-        // hata olursa sadece loglayalım, mekanları yine de gösterelim
         console.warn('Supabase ratings error:', ratingsError);
       }
 
-      // 3) ratingMap: { venue_id: { sum, count } }
       const ratingMap = {};
       (ratingsData || []).forEach((r) => {
         const vid = r.venue_id;
@@ -839,7 +927,6 @@
         ratingMap[vid].count += 1;
       });
 
-      // 4) Mekanlara ortalama ve oy sayısını işle
       venuesCache = (venuesData || []).map((row) => {
         const v = mapRowToVenue(row);
         const stats = ratingMap[row.id];
@@ -859,7 +946,7 @@
     }
   }
 
-  // Yeni bir rating kaydı ekler
+  // Yeni rating kaydı ekler
   async function addVenueRating(venueId, ratingValue, comment) {
     const { error } = await supabaseClient.from('venue_ratings').insert([
       {
@@ -934,6 +1021,64 @@
   async function loadBusinessApplications() {
     const apps = await fetchBusinessApplications();
     renderBusinessApplications(apps);
+  }
+
+  // --- RATING MODAL LOGIC ---
+
+  function openRatingModal(venue) {
+    activeVenueForRating = venue;
+    if (ratingModalTitle) {
+      ratingModalTitle.textContent = `${venue.name} için puan ver`;
+    }
+    if (ratingSelect) ratingSelect.value = '5';
+    if (ratingComment) ratingComment.value = '';
+    if (ratingModal) ratingModal.classList.add('active');
+  }
+
+  function closeRatingModal() {
+    activeVenueForRating = null;
+    if (ratingModal) ratingModal.classList.remove('active');
+  }
+
+  if (ratingModalClose) {
+    ratingModalClose.addEventListener('click', closeRatingModal);
+  }
+  if (ratingModalCancel) {
+    ratingModalCancel.addEventListener('click', closeRatingModal);
+  }
+  if (ratingModal) {
+    ratingModal.addEventListener('click', (e) => {
+      if (e.target === ratingModal) {
+        closeRatingModal();
+      }
+    });
+  }
+
+  if (ratingModalSubmit) {
+    ratingModalSubmit.addEventListener('click', async () => {
+      if (!activeVenueForRating) {
+        closeRatingModal();
+        return;
+      }
+
+      const value = Number(ratingSelect.value || '5');
+      const comment = ratingComment.value?.trim() || null;
+
+      if (!value || value < 1 || value > 5) {
+        alert('Lütfen 1 ile 5 arasında bir puan seçin.');
+        return;
+      }
+
+      try {
+        await addVenueRating(activeVenueForRating.id, value, comment);
+        alert('Puanınız kaydedildi, teşekkür ederiz!');
+        closeRatingModal();
+        await loadVenues();
+      } catch (error) {
+        console.error(error);
+        alert('Puan kaydedilirken bir hata oluştu.');
+      }
+    });
   }
 
   // --- FİLTRE BUTONLARI ---
