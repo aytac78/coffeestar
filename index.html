@@ -1,314 +1,1253 @@
 <!DOCTYPE html>
 <html lang="tr">
-<head>
-  <meta charset="UTF-8" />
-  <title>Coffee Star • Coffee Box – Bodrum Pilot</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <head>
+    <meta charset="UTF-8" />
+    <title>Coffee Star • Coffee Box – Bodrum Pilot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.0/dist/umd/supabase.min.js"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.0/dist/umd/supabase.min.js"></script>
 
-  <style>
-    :root {
-      --turquoise: #11b5c8;
-      --text-main: #172933;
-      --radius-lg: 22px;
-    }
-    * { box-sizing: border-box; margin:0; padding:0; }
-    body {
-      font-family: system-ui;
-      background: radial-gradient(120% 120% at top, #e0f7fa 0, #f8fafc 55%);
-      padding:24px;
-      color:var(--text-main);
-    }
-    .hidden { display:none !important; }
+    <style>
+      :root {
+        --turquoise: #11b5c8;
+        --turquoise-dark: #0b7f8e;
+        --turquoise-soft: #e0f7fa;
+        --coffee-dark: #4b2e19;
+        --coffee-soft: #f4e0c3;
+        --text-main: #172933;
+        --card-border: #dbd5e1;
+        --bg: #f1f5f9;
+        --accent: #f97316;
+        --radius-lg: 22px;
+      }
 
-    /* HEADER */
-    .app-shell { max-width:1100px; margin:0 auto; min-height:100vh; }
-    .header {
-      background: linear-gradient(135deg, #0f8aa3,#11b5c8);
-      border-radius:26px; padding:18px 24px;
-      display:flex; justify-content:space-between; color:#fff;
-    }
-    .logo-circle {
-      width:54px; height:54px; border-radius:18px;
-      display:flex; align-items:center; justify-content:center;
-      font-weight:700; font-size:20px;
-      background: rgba(255,255,255,0.15);
-      text-transform:uppercase;
-    }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    /* MODE SWITCH */
-    .mode-switch {
-      display:inline-flex; gap:6px; background:#e2e8f0;
-      border-radius:999px; padding:4px; margin:12px 0;
-    }
-    .mode-switch button {
-      border:0; background:transparent; padding:6px 16px;
-      border-radius:999px; cursor:pointer; font-size:13px;
-    }
-    .mode-switch button.active {
-      background:white; box-shadow:0 0 6px rgba(0,0,0,0.1)
-    }
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+          "Segoe UI", sans-serif;
+        background: radial-gradient(120% 120% at top, #e0f7fa 0, #f8fafc 55%);
+        color: var(--text-main);
+        padding: 24px;
+      }
 
-    /* PANELS */
-    .panel {
-      background:white; padding:16px; border-radius:20px;
-      box-shadow:0 10px 30px rgba(0,0,0,0.06)
-    }
-    .content { display:grid; grid-template-columns:2fr 1.3fr; gap:24px; }
-    @media (max-width:900px) { .content { grid-template-columns:1fr; } }
+      .app-shell {
+        max-width: 1100px;
+        margin: 0 auto;
+        min-height: calc(100vh - 48px);
+        display: flex;
+        flex-direction: column;
+      }
 
-    /* CARDS */
-    #venueList { margin-top:10px; }
-    .card {
-      border:1px solid #e2e8f0; background:white;
-      border-radius:16px; padding:12px; margin-bottom:10px;
-    }
-    .card-header-row { display:flex; justify-content:space-between; }
-    .meta { font-size:11px; opacity:0.7; }
-    .btn-sm {
-      font-size:11px; border-radius:12px; padding:5px 10px;
-      background:#fff; border:1px solid #ddd; cursor:pointer;
-    }
-    .btn-sm.primary { background:#11b5c8; color:white; border:none; }
+      /* HEADER */
 
-    /* BUSINESS FORM */
-    .biz-item {
-      font-size:11px; padding:6px 0;
-      border-bottom:1px dashed #ddd; display:flex; gap:8px;
-    }
+      .header {
+        background: linear-gradient(135deg, #0f8aa3, #11b5c8);
+        border-radius: 26px;
+        padding: 18px 24px;
+        color: #f9fafb;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 18px 45px rgba(15, 118, 137, 0.35);
+        margin-bottom: 20px;
+      }
 
-    /* MODALS */
-    .modal-overlay {
-      position:fixed; inset:0; backdrop-filter:blur(4px);
-      background:rgba(0,0,0,0.35); display:flex;
-      align-items:center; justify-content:center;
-      z-index:500;
-    }
-    .modal {
-      width:90%; max-width:360px; background:white;
-      border-radius:20px; padding:16px;
-      box-shadow:0 12px 32px rgba(0,0,0,0.15);
-      animation:fadeUp .25s ease;
-    }
-    @keyframes fadeUp {
-      from { opacity:0; transform:translateY(25px); }
-      to { opacity:1; transform:translateY(0); }
-    }
-    .modal-header {
-      display:flex; justify-content:space-between; align-items:center;
-      margin-bottom:10px;
-    }
-    .modal-title { font-size:16px; font-weight:700; }
-    .modal-close {
-      border:0; background:none; cursor:pointer;
-      font-size:22px; margin:-6px; padding:0;
-    }
-    .form-field { margin-bottom:10px; font-size:12px; }
-    textarea,select,input {
-      width:100%; padding:6px; resize:vertical;
-      border-radius:10px; border:1px solid #ccc;
-      font-size:12px;
-    }
-    .modal-actions {
-      display:flex; justify-content:flex-end; gap:8px; margin-top:14px;
-    }
-    .btn-main {
-      background:#11b5c8; color:#fff; border:none;
-      padding:8px 16px; border-radius:12px;
-      cursor:pointer; font-size:12px;
-    }
-    .btn-ghost {
-      background:white; border:1px solid #ddd; padding:8px 12px;
-      border-radius:12px; font-size:12px; cursor:pointer;
-    }
-  </style>
-</head>
+      .logo-box {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
 
-<body>
-<div class="app-shell">
-  <!-- ====================== HEADER ====================== -->
-<header class="header">
-  <div style="display:flex; align-items:center; gap:12px;">
-    <div class="logo-circle">CB</div>
-    <div>
-      <strong>COFFEE STAR</strong><br>
-      <small>Coffee Box™ — Bodrum Pilot</small>
-    </div>
-  </div>
-  <small>POWERED BY TiT TECHNOLOGIES</small>
-</header>
+      .logo-circle {
+        width: 54px;
+        height: 54px;
+        border-radius: 18px;
+        background: rgba(15, 23, 42, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 20px;
+        letter-spacing: 1px;
+      }
 
-<!-- ====================== MODE SWITCH ====================== -->
-<div class="mode-switch">
-  <button class="active" data-mode="customer">👤 Müşteri</button>
-  <button data-mode="business">🏪 İşletme</button>
-</div>
+      .logo-circle span {
+        margin-top: 2px;
+      }
 
-<!-- ====================== CONTENT ====================== -->
-<main class="content">
+      .logo-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
 
-  <!-- CUSTOMER PANEL -->
-  <section class="panel" id="customerPanel">
-    <h3>Yakındaki Mekanlar</h3>
-    <div id="venueList"></div>
-  </section>
+      .logo-text-title {
+        font-size: 18px;
+        font-weight: 700;
+      }
 
-  <!-- BUSINESS PANEL -->
-  <section class="panel hidden" id="businessPanel">
-    <h3>İşletme Başvurusu</h3>
-    <form id="businessForm">
-      <div class="form-field">
-        <label>İşletme Adı</label>
-        <input name="name" required />
-      </div>
-      <div class="form-field">
-        <label>Bölge / İlçe</label>
-        <select name="district" required>
-          <option value="Bodrum Merkez">Bodrum Merkez</option>
-          <option value="Bitez">Bitez</option>
-          <option value="Turgutreis">Turgutreis</option>
-        </select>
-      </div>
-      <div class="form-field">
-        <label>E-posta</label>
-        <input name="email" type="email"/>
-      </div>
-      <div class="form-field">
-        <label>Notlar</label>
-        <textarea name="notes"></textarea>
-      </div>
-      <button class="btn-main" type="submit">Gönder</button>
-    </form>
-    <div id="bizList"></div>
-  </section>
+      .logo-text-sub {
+        font-size: 12px;
+        opacity: 0.9;
+      }
 
-</main>
+      .header-right {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1.8px;
+        opacity: 0.9;
+      }
 
-<!-- ====================== RATING MODAL ====================== -->
-<div id="ratingModal" class="modal-overlay hidden">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title" id="ratingModalTitle">Puan Ver</span>
-      <button class="modal-close" id="ratingModalClose">×</button>
-    </div>
-    <div class="form-field">
-      <label>Puan</label>
-      <select id="ratingSelect">
-        <option value="5">5 — Harika</option>
-        <option value="4">4 — Çok İyi</option>
-        <option value="3">3 — Orta</option>
-        <option value="2">2 — Kötü</option>
-        <option value="1">1 — Berbat</option>
-      </select>
-    </div>
-    <div class="form-field">
-      <label>Yorum (isteğe bağlı)</label>
-      <textarea id="ratingComment"></textarea>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-ghost" id="ratingModalCancel">Vazgeç</button>
-      <button class="btn-main" id="ratingModalSubmit">Gönder</button>
-    </div>
-  </div>
-</div>
+      /* MODE SWITCH */
 
-<!-- ====================== DETAILS MODAL ====================== -->
-<div id="detailsModal" class="modal-overlay hidden">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title" id="detailsTitle"></span>
-      <button class="modal-close" id="detailsClose">×</button>
-    </div>
-    <p><strong>Puan:</strong> <span id="detailsRating"></span></p>
-    <p><strong>Bölge:</strong> <span id="detailsDistrict"></span></p>
-    <p><strong>Not:</strong> <span id="detailsNotes"></span></p>
-    <div class="modal-actions">
-      <button class="btn-main" id="detailsCloseBottom">Kapat</button>
-    </div>
-  </div>
-</div>
+      .mode-switch {
+        display: inline-flex;
+        margin: 4px 0 18px;
+        padding: 4px;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.16);
+        gap: 4px;
+      }
 
-<footer style="text-align:center; margin-top:20px">
-  TiT Technologies — Coffee Box Pilot
-</footer>
+      .mode-btn {
+        border-radius: 999px;
+        border: none;
+        padding: 6px 16px;
+        font-size: 13px;
+        cursor: pointer;
+        background: transparent;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.18s ease;
+      }
 
-<!-- ====================== JAVASCRIPT ====================== -->
-<script>
-/* Supabase Config */
-const supabaseClient = supabase.createClient(
-  "https://girurtvcbudkjrvfjdte.supabase.co",
-  "YOUR_ANON_KEY_HERE"
-);
+      .mode-btn span.icon {
+        font-size: 14px;
+      }
 
-/* DOM */
-const venueList = document.getElementById('venueList');
-const businessPanel = document.getElementById('businessPanel');
-const customerPanel = document.getElementById('customerPanel');
-const bizList = document.getElementById('bizList');
-const bizForm = document.getElementById('businessForm');
+      .mode-btn.active {
+        background: #ffffff;
+        color: #0f172a;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.18);
+      }
 
-/* Global */
-let venuesCache = [];
-let activeVenueForRating = null;
+      /* MAIN LAYOUT */
 
-/* Render Venue Cards */
-function renderVenues(data) {
-  venueList.innerHTML = "";
-  data.forEach(v => {
-    const el = document.createElement("div");
-    el.className = "card";
-    el.innerHTML = `
-      <div class="card-header-row">
-        <strong>${v.name}</strong>
-        <span class="meta">${v.rating.toFixed(1)} • ${v.votes} oy</span>
-      </div>
-      <div class="meta">${v.district}</div>
-      <div class="card-footer-row">
-        <button class="btn-sm" onclick='openDetailsModal(${JSON.stringify(v)})'>
-          Detay / Yorum
+      .content {
+        display: grid;
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+        gap: 24px;
+      }
+
+      @media (max-width: 900px) {
+        .content {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      /* CUSTOMER PANEL */
+
+      .panel {
+        background: rgba(255, 255, 255, 0.88);
+        border-radius: 24px;
+        padding: 16px 18px 18px;
+        box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+      }
+
+      .panel-header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .panel-title {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .panel-title h2 {
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .panel-title span {
+        font-size: 11px;
+        color: #64748b;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        padding: 4px 10px;
+        font-size: 11px;
+        color: #475569;
+        gap: 6px;
+        background: #f8fafc;
+      }
+
+      .filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .filter-pill {
+        border-radius: 999px;
+        border: 1px solid #e2e8f0;
+        padding: 5px 12px;
+        font-size: 11px;
+        cursor: pointer;
+        background: #ffffff;
+        color: #475569;
+        transition: all 0.16s ease;
+      }
+
+      .filter-pill.active {
+        background: #0ea5e9;
+        color: white;
+        border-color: #0284c7;
+        box-shadow: 0 8px 18px rgba(14, 165, 233, 0.4);
+      }
+
+      .distance-note {
+        font-size: 11px;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-bottom: 10px;
+      }
+
+      .distance-note span.icon {
+        font-size: 14px;
+      }
+
+      .list-card-shell {
+        margin-top: 6px;
+        border-radius: 20px;
+        padding: 10px 10px 4px;
+        background: linear-gradient(
+          145deg,
+          rgba(148, 163, 184, 0.2),
+          rgba(226, 232, 240, 0.1)
+        );
+      }
+
+      .list-card-inner {
+        background: #f8fafc;
+        border-radius: 18px;
+        border: 1px solid rgba(203, 213, 225, 0.8);
+        padding: 10px;
+        max-height: 520px;
+        overflow-y: auto;
+      }
+
+      /* VENUE CARDS */
+
+      .card {
+        background: #ffffff;
+        border-radius: 18px;
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        padding: 12px 12px 10px;
+        margin-bottom: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+      }
+
+      .card-header-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .card-header-left h3 {
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 2px;
+      }
+
+      .meta {
+        font-size: 11px;
+        color: #6b7280;
+      }
+
+      .card-header-right {
+        font-size: 11px;
+        font-weight: 600;
+        color: #0f172a;
+        white-space: nowrap;
+        margin-top: 2px;
+      }
+
+      .card-body {
+        font-size: 11px;
+        color: #4b5563;
+        margin-top: 2px;
+      }
+
+      .card-body p {
+        margin-bottom: 4px;
+      }
+
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 2px;
+      }
+
+      .tag {
+        font-size: 10px;
+        border-radius: 999px;
+        padding: 2px 8px;
+        background: rgba(15, 118, 110, 0.06);
+        border: 1px solid rgba(34, 197, 94, 0.4);
+        color: #065f46;
+      }
+
+      .card-footer-row {
+        display: flex;
+        justify-content: flex-end;
+        gap: 6px;
+        margin-top: 4px;
+      }
+
+      .btn-sm {
+        border-radius: 999px;
+        border: 1px solid #cbd5f5;
+        background: #ffffff;
+        font-size: 11px;
+        padding: 4px 10px;
+        cursor: pointer;
+        color: #334155;
+        transition: all 0.14s ease;
+      }
+
+      .btn-sm.primary {
+        background: #0ea5e9;
+        border-color: #0284c7;
+        color: #f9fafb;
+      }
+
+      .btn-sm:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+      }
+
+      /* BUSINESS PANEL */
+
+      .panel-title-small {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+
+      .panel-sub {
+        font-size: 11px;
+        color: #64748b;
+        margin-bottom: 10px;
+      }
+
+      .biz-form-grid {
+        display: grid;
+        grid-template-columns: 1.1fr 1.2fr;
+        gap: 12px;
+      }
+
+      @media (max-width: 900px) {
+        .biz-form-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 11px;
+      }
+
+      .form-field label {
+        font-weight: 600;
+        color: #0f172a;
+      }
+
+      .form-field input,
+      .form-field select,
+      .form-field textarea {
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 6px 8px;
+        font-size: 11px;
+        font-family: inherit;
+        resize: vertical;
+      }
+
+      .form-field textarea {
+        min-height: 76px;
+      }
+
+      .form-actions {
+        margin-top: 10px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .btn-main {
+        border-radius: 999px;
+        border: none;
+        padding: 7px 16px;
+        background: linear-gradient(135deg, #0f766e, #22c55e);
+        color: white;
+        font-size: 12px;
+        cursor: pointer;
+        box-shadow: 0 12px 28px rgba(16, 185, 129, 0.4);
+      }
+
+      .small-note {
+        font-size: 10px;
+        color: #6b7280;
+        margin-top: 6px;
+      }
+
+      .biz-list {
+        margin-top: 12px;
+        padding-top: 8px;
+        border-top: 1px dashed #cbd5e1;
+        max-height: 230px;
+        overflow-y: auto;
+      }
+
+      .biz-item {
+        font-size: 11px;
+        padding: 4px 0;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+        display: flex;
+        justify-content: space-between;
+        gap: 6px;
+      }
+
+      .biz-item span.name {
+        font-weight: 600;
+      }
+
+      .biz-item span.district {
+        color: #64748b;
+      }
+
+      /* FOOTER */
+
+      .footer {
+        margin-top: 18px;
+        text-align: center;
+        font-size: 11px;
+        color: #64748b;
+      }
+
+      .footer span {
+        font-weight: 600;
+        color: #0f172a;
+      }
+
+      /* MODAL GENEL */
+
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.38);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+      }
+
+      .modal-overlay.hidden {
+        display: none;
+      }
+
+      .modal {
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 16px 18px 14px;
+        max-width: 420px;
+        width: 100%;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.4);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .modal-title {
+        font-size: 15px;
+        font-weight: 600;
+      }
+
+      .modal-close {
+        border: none;
+        background: transparent;
+        font-size: 20px;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .modal-body {
+        font-size: 12px;
+        color: #374151;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .modal-actions {
+        margin-top: 10px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .btn-ghost {
+        border-radius: 999px;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        font-size: 12px;
+        padding: 6px 14px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <!-- HEADER -->
+      <header class="header">
+        <div class="logo-box">
+          <div class="logo-circle">
+            <span>CB</span>
+          </div>
+          <div class="logo-text">
+            <div class="logo-text-title">COFFEE STAR</div>
+            <div class="logo-text-sub">
+              Coffee Box™ — Bodrum Pilot • Yakındaki kahve noktalarını keşfet
+            </div>
+          </div>
+        </div>
+        <div class="header-right">POWERED BY TiT TECHNOLOGIES</div>
+      </header>
+
+      <!-- MODE SWITCH -->
+      <div class="mode-switch">
+        <button class="mode-btn active" data-mode="customer">
+          <span class="icon">👤</span>
+          <span>Müşteri</span>
         </button>
-        <button class="btn-sm primary" onclick='openRatingModal(${JSON.stringify(v)})'>
-          Puan Ver
+        <button class="mode-btn" data-mode="business">
+          <span class="icon">🏪</span>
+          <span>İşletme</span>
         </button>
-      </div>`;
-    venueList.appendChild(el);
-  });
-}
+      </div>
 
-/* Load Venues */
-async function loadVenues() {
-  const { data } = await supabaseClient.from("venues").select("*");
-  venuesCache = (data || []).map(v=>{
-    return {...v, rating:v.rating||0, votes:v.votes||0}
-  });
-  renderVenues(venuesCache);
-}
+      <!-- MAIN CONTENT -->
+      <main class="content">
+        <!-- CUSTOMER PANEL -->
+        <section class="panel" id="customerPanel">
+          <div class="panel-header-row">
+            <div class="panel-title">
+              <h2>Yakındaki Kahve Mekanları</h2>
+              <span>
+                Bodrum Merkez, Bitez ve Turgutreis için Coffee Box listesi
+              </span>
+            </div>
+            <div class="badge">
+              ☕️
+              <span>Bodrum Coffee Box • Pilot</span>
+            </div>
+          </div>
 
-/* Submit Business */
-bizForm.addEventListener("submit", async(e)=>{
-  e.preventDefault();
-  const f = new FormData(bizForm);
-  const payload = Object.fromEntries(f.entries());
-  await supabaseClient.from("business_applications").insert([payload]);
-  alert("Başvurunuz alındı!");
-  bizForm.reset();
-});
+          <!-- Filter pills -->
+          <div class="filter-row">
+            <button class="filter-pill active" data-district="all">
+              Tüm bölgeler
+            </button>
+            <button class="filter-pill" data-district="Bodrum Merkez">
+              Bodrum Merkez
+            </button>
+            <button class="filter-pill" data-district="Bitez">Bitez</button>
+            <button class="filter-pill" data-district="Turgutreis">
+              Turgutreis
+            </button>
+          </div>
 
-/* Mode Toggle */
-document.querySelectorAll(".mode-switch button").forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    document.querySelectorAll(".mode-switch button").forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
-    const isCust = btn.dataset.mode==="customer";
-    customerPanel.classList.toggle("hidden", !isCust);
-    businessPanel.classList.toggle("hidden", isCust);
-  });
-});
+          <div class="distance-note">
+            <span class="icon">📍</span>
+            <span id="distanceNote">
+              Konum izni bu demo sürümde sabit; gerçek sistemde gerçek
+              lokasyona göre sıralama yapılacaktır.
+            </span>
+          </div>
 
-loadVenues();
-</script>
+          <div class="list-card-shell">
+            <div class="list-card-inner" id="venueList">
+              <!-- JS ile doldurulacak -->
+            </div>
+          </div>
+        </section>
 
-</body>
+        <!-- BUSINESS PANEL -->
+        <section class="panel" id="businessPanel" style="display: none">
+          <div class="panel-title-small">
+            Coffee Box • İşletme Başvuru Formu (Bodrum Pilot)
+          </div>
+          <div class="panel-sub">
+            Bodrum Merkez, Bitez veya Turgutreis’te bir kahve işletmeniz varsa
+            formu doldurun; Coffee Box ekibi sizinle iletişime geçsin.
+          </div>
+
+          <form id="businessForm">
+            <div class="biz-form-grid">
+              <div>
+                <div class="form-field">
+                  <label>İşletme Adı</label>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Örn: Seaside Brew Bodrum"
+                    required
+                  />
+                </div>
+
+                <div class="form-field">
+                  <label>Bölge / İlçe</label>
+                  <select name="district" required>
+                    <option value="">Seçiniz</option>
+                    <option value="Bodrum Merkez">Bodrum Merkez</option>
+                    <option value="Bitez">Bitez</option>
+                    <option value="Turgutreis">Turgutreis</option>
+                  </select>
+                </div>
+
+                <div class="form-field">
+                  <label>İletişim E-posta</label>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="İşletme e-posta adresi"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div class="form-field">
+                  <label>Öne çıkan özellikler</label>
+                  <textarea
+                    name="notes"
+                    placeholder="Örn: 3. dalga kahve, kale manzarası, güçlü Wi-Fi, laptop çalışma alanı vb."
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn-main">
+                Başvuruyu Gönder
+              </button>
+            </div>
+
+            <div class="small-note">
+              Bu pilot sürümde form verileri yalnızca demo amaçlı kaydedilir.
+              Global lansmanda tüm başvurular Coffee Box ekibi tarafından tek
+              tek değerlendirilecektir.
+            </div>
+          </form>
+
+          <div class="biz-list" id="bizList">
+            <!-- Başvurular burada listelenecek -->
+          </div>
+        </section>
+      </main>
+
+      <!-- FOOTER -->
+      <footer class="footer">
+        <span>TiT</span> Technologies • Coffee Box Pilot
+      </footer>
+    </div>
+
+    <!-- PUAN VER MODALİ -->
+    <div id="ratingModal" class="modal-overlay hidden">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title" id="ratingModalTitle">Mekanı Puanla</h2>
+          <button
+            type="button"
+            class="modal-close"
+            id="ratingModalClose"
+          >
+            ×
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-field">
+            <label for="ratingSelect">Puan</label>
+            <select id="ratingSelect" required>
+              <option value="5">5 – Harika</option>
+              <option value="4">4 – Çok İyi</option>
+              <option value="3">3 – Ortalama</option>
+              <option value="2">2 – Zayıf</option>
+              <option value="1">1 – Kötü</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="ratingComment">Yorum (isteğe bağlı)</label>
+            <textarea
+              id="ratingComment"
+              placeholder="Kahve, ortam, Wi-Fi vb. hakkında görüşünüz..."
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" id="ratingModalCancel">
+            Vazgeç
+          </button>
+          <button type="button" class="btn-main" id="ratingModalSubmit">
+            Gönder
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DETAY / YORUM MODALİ -->
+    <div id="detailsModal" class="modal-overlay hidden">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title" id="detailsTitle">Mekan Detayı</h2>
+          <button type="button" class="modal-close" id="detailsClose">×</button>
+        </div>
+
+        <div class="modal-body">
+          <p>
+            <strong>Puan:</strong>
+            <span id="detailsRating">–</span>
+          </p>
+          <p>
+            <strong>Bölge:</strong>
+            <span id="detailsDistrict">–</span>
+          </p>
+          <p>
+            <strong>Not:</strong>
+            <span id="detailsNotes">–</span>
+          </p>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-main" id="detailsCloseBottom">
+            Kapat
+          </button>
+        </div>
+      </div>
+    </div>
+        <!-- APP SCRIPT -->
+    <script>
+      // --- SUPABASE AYARLARI ---
+      const supabaseUrl = 'https://girurtvcbudkjrvfjdte.supabase.co';
+      const supabaseKey =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpcnVydHZjYnVka2pydmZqZHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzMDA1ODksImV4cCI6MjA3ODg3NjU4OX0.n2Q9bvirUMIFgH1l4G7prZHCvr1wxwzrSGZw9OCUJ9A';
+
+      const { createClient } = window.supabase;
+      const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+      // --- STATE & DOM ---
+
+      const venueList = document.getElementById('venueList');
+      const filterButtons = document.querySelectorAll('.filter-pill');
+      const distanceNote = document.getElementById('distanceNote');
+      const modeButtons = document.querySelectorAll('.mode-btn');
+      const customerPanel = document.getElementById('customerPanel');
+      const businessPanel = document.getElementById('businessPanel');
+      const bizForm = document.getElementById('businessForm');
+      const bizList = document.getElementById('bizList');
+
+      // PUAN VER MODAL
+      const ratingModal = document.getElementById('ratingModal');
+      const ratingModalTitle = document.getElementById('ratingModalTitle');
+      const ratingModalClose = document.getElementById('ratingModalClose');
+      const ratingModalCancel = document.getElementById('ratingModalCancel');
+      const ratingModalSubmit = document.getElementById('ratingModalSubmit');
+      const ratingSelect = document.getElementById('ratingSelect');
+      const ratingComment = document.getElementById('ratingComment');
+      let activeVenueForRating = null;
+
+      // DETAY MODALI
+      const detailsModal = document.getElementById('detailsModal');
+      const detailsTitle = document.getElementById('detailsTitle');
+      const detailsRating = document.getElementById('detailsRating');
+      const detailsDistrict = document.getElementById('detailsDistrict');
+      const detailsNotes = document.getElementById('detailsNotes');
+      const detailsClose = document.getElementById('detailsClose');
+      const detailsCloseBottom = document.getElementById('detailsCloseBottom');
+
+      let activeDistrict = 'all';
+      let venuesCache = [];
+
+      // --- YARDIMCI FONKSİYONLAR ---
+
+      function mapRowToVenue(row) {
+        return {
+          id: row.id,
+          name: row.name || '',
+          district: row.district || 'Bodrum Merkez',
+          rating: typeof row.rating === 'number' ? row.rating : 0,
+          votes: typeof row.votes === 'number' ? row.votes : 0,
+          priceLevel:
+            row.pricelevel ??
+            row.price_level ??
+            row.price ??
+            row.priceLevel ??
+            2,
+          tags: Array.isArray(row.tags) ? row.tags : [],
+          notes: row.notes || row.description || '',
+          wifi: row.wifi || '',
+          approxDistance: row.approx_distance ?? row.approx_distance_km ?? 0
+        };
+      }
+
+      function openDetailsModal(venue) {
+        detailsTitle.textContent = venue.name || 'Mekan Detayı';
+
+        const ratingValue = Number(venue.rating ?? 0);
+        const votesValue = Number(venue.votes ?? 0);
+
+        if (votesValue > 0) {
+          detailsRating.textContent = `${ratingValue.toFixed(1)} • ${votesValue} oy`;
+        } else {
+          detailsRating.textContent = 'Henüz oy yok';
+        }
+
+        detailsDistrict.textContent = venue.district || '-';
+        detailsNotes.textContent = venue.notes || '-';
+
+        detailsModal.classList.remove('hidden');
+      }
+
+      function closeDetailsModal() {
+        detailsModal.classList.add('hidden');
+      }
+
+      if (detailsClose) {
+        detailsClose.addEventListener('click', closeDetailsModal);
+      }
+      if (detailsCloseBottom) {
+        detailsCloseBottom.addEventListener('click', closeDetailsModal);
+      }
+      if (detailsModal) {
+        detailsModal.addEventListener('click', (event) => {
+          if (event.target === detailsModal) {
+            closeDetailsModal();
+          }
+        });
+      }
+
+      function renderVenueCards(data) {
+        if (!venueList) {
+          console.error('venueList elementi bulunamadı');
+          return;
+        }
+
+        venueList.innerHTML = '';
+
+        const filtered = data.filter((v) => {
+          if (activeDistrict === 'all') return true;
+          return (
+            (v.district || '').toLowerCase() === activeDistrict.toLowerCase()
+          );
+        });
+
+        if (filtered.length === 0) {
+          venueList.innerHTML =
+            '<p>Bu bölge için henüz kayıtlı kahve mekanı yok.</p>';
+          return;
+        }
+
+        filtered.forEach((v) => {
+          const card = document.createElement('div');
+          card.className = 'card';
+
+          const headerRow = document.createElement('div');
+          headerRow.className = 'card-header-row';
+
+          const left = document.createElement('div');
+          left.className = 'card-header-left';
+
+          const nameEl = document.createElement('h3');
+          nameEl.textContent = v.name;
+          left.appendChild(nameEl);
+
+          const districtEl = document.createElement('div');
+          districtEl.className = 'meta';
+          districtEl.textContent = v.district || '';
+          left.appendChild(districtEl);
+
+          const distanceEl = document.createElement('div');
+          distanceEl.className = 'meta';
+          if (v.approxDistance) {
+            distanceEl.textContent = `~${v.approxDistance.toFixed(
+              1
+            )} km tahmini mesafe`;
+          }
+          left.appendChild(distanceEl);
+
+          const right = document.createElement('div');
+          right.className = 'card-header-right';
+          right.textContent = `${v.rating.toFixed(1)}  •  ${v.votes} oy`;
+
+          headerRow.appendChild(left);
+          headerRow.appendChild(right);
+
+          const body = document.createElement('div');
+          body.className = 'card-body';
+
+          if (v.notes) {
+            const notesEl = document.createElement('p');
+            notesEl.textContent = v.notes;
+            body.appendChild(notesEl);
+          }
+
+          if (Array.isArray(v.tags) && v.tags.length > 0) {
+            const tagsRow = document.createElement('div');
+            tagsRow.className = 'tag-row';
+            v.tags.forEach((tag) => {
+              const span = document.createElement('span');
+              span.className = 'tag';
+              span.textContent = tag;
+              tagsRow.appendChild(span);
+            });
+            body.appendChild(tagsRow);
+          }
+
+          if (v.wifi) {
+            const wifiEl = document.createElement('div');
+            wifiEl.className = 'meta';
+            wifiEl.textContent = v.wifi;
+            body.appendChild(wifiEl);
+          }
+
+          const footer = document.createElement('div');
+          footer.className = 'card-footer-row';
+
+          const btnDetail = document.createElement('button');
+          btnDetail.className = 'btn-sm';
+          btnDetail.textContent = 'Detay / Yorum';
+          btnDetail.onclick = () => openDetailsModal(v);
+
+          const btnRate = document.createElement('button');
+          btnRate.className = 'btn-sm primary';
+          btnRate.textContent = 'Puan Ver';
+          btnRate.onclick = () => openRatingModal(v);
+
+          footer.appendChild(btnDetail);
+          footer.appendChild(btnRate);
+
+          card.appendChild(headerRow);
+          card.appendChild(body);
+          card.appendChild(footer);
+
+          venueList.appendChild(card);
+        });
+      }
+
+      // --- SUPABASE: VENUES + OY ORTALAMALARI ---
+
+      async function loadVenues() {
+        try {
+          const { data: venuesData, error: venuesError } = await supabaseClient
+            .from('venues')
+            .select('*');
+
+          if (venuesError) {
+            console.error('Supabase venues error:', venuesError);
+            venueList.innerHTML = '<p>Veri yüklenemedi.</p>';
+            return;
+          }
+
+          const { data: ratingsData, error: ratingsError } = await supabaseClient
+            .from('venue_ratings')
+            .select('venue_id, rating');
+
+          if (ratingsError) {
+            console.warn('Supabase ratings error:', ratingsError);
+          }
+
+          const ratingMap = {};
+          (ratingsData || []).forEach((r) => {
+            const vid = r.venue_id;
+            if (!ratingMap[vid]) {
+              ratingMap[vid] = { sum: 0, count: 0 };
+            }
+            ratingMap[vid].sum += Number(r.rating) || 0;
+            ratingMap[vid].count += 1;
+          });
+
+          venuesCache = (venuesData || []).map((row) => {
+            const v = mapRowToVenue(row);
+            const stats = ratingMap[row.id];
+            if (stats && stats.count > 0) {
+              v.rating = stats.sum / stats.count;
+              v.votes = stats.count;
+            }
+            return v;
+          });
+
+          renderVenueCards(venuesCache);
+          console.log('Supabase Data (venues):', venuesData);
+        } catch (err) {
+          console.error('Beklenmeyen hata (loadVenues):', err);
+          venueList.innerHTML =
+            '<p>Beklenmeyen bir hata oluştu, lütfen daha sonra tekrar deneyin.</p>';
+        }
+      }
+
+      // Yeni rating kaydı ekler
+      async function addVenueRating(venueId, ratingValue, comment) {
+        const { error } = await supabaseClient.from('venue_ratings').insert([
+          {
+            venue_id: venueId,
+            rating: ratingValue,
+            comment: comment || null
+          }
+        ]);
+
+        if (error) {
+          console.error('İşletme puanı kaydedilemedi:', error);
+          throw error;
+        }
+      }
+
+      // --- İŞLETME BAŞVURUSU: Supabase insert ---
+
+      async function addBusinessApplication(payload) {
+        const { data, error } = await supabaseClient
+          .from('business_applications')
+          .insert([payload]);
+
+        if (error) {
+          console.error('İşletme başvurusu kaydedilemedi:', error);
+          throw error;
+        }
+
+        return data;
+      }
+
+      // --- İŞLETME BAŞVURU LİSTESİ (ADMIN) ---
+
+      async function fetchBusinessApplications() {
+        const { data, error } = await supabaseClient
+          .from('business_applications')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Başvurular alınamadı:', error);
+          return [];
+        }
+
+        return data || [];
+      }
+
+      function renderBusinessApplications(applications) {
+        if (!bizList) return;
+
+        if (!applications.length) {
+          bizList.innerHTML = '<p>Henüz başvuru yok.</p>';
+          return;
+        }
+
+        bizList.innerHTML = '';
+
+        applications.forEach((app) => {
+          const row = document.createElement('div');
+          row.className = 'biz-item';
+
+          row.innerHTML = `
+            <span class="name">${app.name || '-'}</span>
+            <span class="district">${app.district || ''}</span>
+            <span>${app.email || ''}</span>
+            <span>${app.status || ''}</span>
+          `;
+
+          bizList.appendChild(row);
+        });
+      }
+
+      async function loadBusinessApplications() {
+        const apps = await fetchBusinessApplications();
+        renderBusinessApplications(apps);
+      }
+
+      // --- RATING MODAL LOGIC ---
+
+      function openRatingModal(venue) {
+        activeVenueForRating = venue;
+        if (ratingModalTitle) {
+          ratingModalTitle.textContent = `${venue.name} için puan ver`;
+        }
+        if (ratingSelect) ratingSelect.value = '5';
+        if (ratingComment) ratingComment.value = '';
+        if (ratingModal) ratingModal.classList.remove('hidden');
+      }
+
+      function closeRatingModal() {
+        activeVenueForRating = null;
+        if (ratingModal) ratingModal.classList.add('hidden');
+      }
+
+      if (ratingModalClose) {
+        ratingModalClose.addEventListener('click', closeRatingModal);
+      }
+      if (ratingModalCancel) {
+        ratingModalCancel.addEventListener('click', closeRatingModal);
+      }
+      if (ratingModal) {
+        ratingModal.addEventListener('click', (e) => {
+          if (e.target === ratingModal) {
+            closeRatingModal();
+          }
+        });
+      }
+
+      if (ratingModalSubmit) {
+        ratingModalSubmit.addEventListener('click', async () => {
+          if (!activeVenueForRating) {
+            closeRatingModal();
+            return;
+          }
+
+          const value = Number(ratingSelect.value || '5');
+          const comment = ratingComment.value?.trim() || null;
+
+          if (!value || value < 1 || value > 5) {
+            alert('Lütfen 1 ile 5 arasında bir puan seçin.');
+            return;
+          }
+
+          try {
+            await addVenueRating(activeVenueForRating.id, value, comment);
+            alert('Puanınız kaydedildi, teşekkür ederiz!');
+            closeRatingModal();
+            await loadVenues();
+          } catch (error) {
+            console.error(error);
+            alert('Puan kaydedilirken bir hata oluştu.');
+          }
+        });
+      }
+
+      // --- FİLTRE BUTONLARI ---
+
+      filterButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          filterButtons.forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          activeDistrict = btn.dataset.district || 'all';
+          renderVenueCards(venuesCache);
+        });
+      });
+
+      // --- MOD (Müşteri / İşletme) BUTONLARI ---
+
+      modeButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          modeButtons.forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          const mode = btn.dataset.mode;
+          if (mode === 'customer') {
+            customerPanel.style.display = '';
+            businessPanel.style.display = 'none';
+          } else {
+            customerPanel.style.display = 'none';
+            businessPanel.style.display = '';
+          }
+        });
+      });
+
+      // --- GEOLOCATION BİLGİ METNİ (demo) ---
+
+      if (distanceNote) {
+        if ('geolocation' in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            () => {
+              distanceNote.textContent =
+                '📍 Konum izni aktif. Bu demo sürümde yaklaşık mesafe sabit, gerçek sistemde gerçek lokasyona göre sıralanacaktır.';
+            },
+            () => {
+              distanceNote.textContent =
+                '📍 Konum izni verilmedi. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.';
+            }
+          );
+        } else {
+          distanceNote.textContent =
+            '📍 Tarayıcınız konum desteği sunmuyor. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.';
+        }
+      }
+
+      // --- İŞLETME FORMU SUBMIT ---
+
+      if (bizForm) {
+        bizForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const formData = new FormData(bizForm);
+
+          const payload = {
+            name: formData.get('name'),
+            district: formData.get('district'),
+            email: formData.get('email'),
+            notes: formData.get('notes'),
+            status: 'pending'
+          };
+
+          console.log('İşletme başvurusu (giden payload):', payload);
+
+          try {
+            await addBusinessApplication(payload);
+            alert(
+              'Başvurunuz alındı! Demo sürümdeyiz; Coffee Box ekibi başvurunuzu değerlendirecek.'
+            );
+            bizForm.reset();
+            await loadBusinessApplications();
+          } catch (error) {
+            console.error(error);
+            alert(
+              'Başvuru kaydedilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.'
+            );
+          }
+        });
+      }
+
+      // --- INIT ---
+
+      loadVenues();
+      loadBusinessApplications();
+    </script>
+  </body>
 </html>
