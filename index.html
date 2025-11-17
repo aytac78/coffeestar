@@ -465,119 +465,76 @@
         font-weight: 600;
         color: #0f172a;
       }
-            /* RATING MODAL */
+ <!-- PUAN VER MODALİ -->
+<div id="ratingModal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Mekanı Puanla</h2>
+      <button type="button" class="modal-close" id="ratingModalClose">×</button>
+    </div>
 
-      .modal-backdrop {
-        position: fixed;
-        inset: 0;
-        background: rgba(15, 23, 42, 0.35);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 40;
-      }
+    <div class="modal-body">
+      <div class="form-field">
+        <label for="ratingSelect">Puan</label>
+        <select id="ratingSelect" required>
+          <option value="5">5 – Harika</option>
+          <option value="4">4 – Çok İyi</option>
+          <option value="3">3 – Ortalama</option>
+          <option value="2">2 – Zayıf</option>
+          <option value="1">1 – Kötü</option>
+        </select>
+      </div>
 
-      .modal-backdrop.active {
-        display: flex;
-      }
-
-      .modal {
-        background: #ffffff;
-        border-radius: 18px;
-        padding: 16px 18px 14px;
-        width: min(380px, 90vw);
-        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.3);
-        font-size: 12px;
-      }
-
-      .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-      }
-
-      .modal-title {
-        font-weight: 600;
-        font-size: 14px;
-      }
-
-      .modal-close {
-        border: none;
-        background: transparent;
-        cursor: pointer;
-        font-size: 18px;
-        line-height: 1;
-      }
-
-      .modal-body {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .modal-actions {
-        margin-top: 10px;
-        display: flex;
-        justify-content: flex-end;
-        gap: 8px;
-      }
-
-      .btn-ghost {
-        border-radius: 999px;
-        border: 1px solid #e2e8f0;
-        background: #f8fafc;
-        font-size: 12px;
-        padding: 6px 14px;
-        cursor: pointer;
-      }
-    </style>
-  </head>
-    <!-- PUANLAMA MODALI -->
-    <div id="ratingModal" class="modal-backdrop">
-      <div class="modal">
-        <div class="modal-header">
-          <div class="modal-title" id="ratingModalTitle">Mekan Puanla</div>
-          <button
-            type="button"
-            class="modal-close"
-            id="ratingModalClose"
-            aria-label="Kapat"
-          >
-            ×
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="form-field">
-            <label for="ratingSelect">Puanınız</label>
-            <select id="ratingSelect" required>
-              <option value="5">5 – Harika</option>
-              <option value="4">4 – Çok iyi</option>
-              <option value="3">3 – Ortalama</option>
-              <option value="2">2 – Zayıf</option>
-              <option value="1">1 – Kötü</option>
-            </select>
-          </div>
-          <div class="form-field">
-            <label for="ratingComment">Yorum (isteğe bağlı)</label>
-            <textarea
-              id="ratingComment"
-              placeholder="Kahve, ortam, Wi-Fi vb. hakkında görüşünüz..."
-            ></textarea>
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn-ghost" id="ratingModalCancel">
-            Vazgeç
-          </button>
-          <button type="button" class="btn-main" id="ratingModalSubmit">
-            Gönder
-          </button>
-        </div>
+      <div class="form-field">
+        <label for="ratingComment">Yorum (isteğe bağlı)</label>
+        <textarea
+          id="ratingComment"
+          placeholder="Kahve, ortam, Wi-Fi vb. hakkında görüşünüz..."
+        ></textarea>
       </div>
     </div>
-  <body>
-    <div class="app-shell">
+
+    <div class="modal-actions">
+      <button type="button" class="btn-ghost" id="ratingModalCancel">
+        Vazgeç
+      </button>
+      <button type="button" class="btn-main" id="ratingModalSubmit">
+        Gönder
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAY / YORUM MODALİ -->
+<div id="detailsModal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="detailsTitle">Mekan Detayı</h2>
+      <button type="button" class="modal-close" id="detailsClose">×</button>
+    </div>
+
+    <div class="modal-body">
+      <p>
+        <strong>Puan:</strong>
+        <span id="detailsRating">–</span>
+      </p>
+      <p>
+        <strong>Bölge:</strong>
+        <span id="detailsDistrict">–</span>
+      </p>
+      <p>
+        <strong>Not:</strong>
+        <span id="detailsNotes">–</span>
+      </p>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn-main" id="detailsCloseBottom">
+        Kapat
+      </button>
+    </div>
+  </div>
+</div>
       <!-- HEADER -->
       <header class="header">
         <div class="logo-box">
@@ -752,15 +709,64 @@
   const bizForm = document.getElementById('businessForm');
   const bizList = document.getElementById('bizList');
 
-  // Rating modal DOM
-  const ratingModal = document.getElementById('ratingModal');
-  const ratingModalTitle = document.getElementById('ratingModalTitle');
-  const ratingSelect = document.getElementById('ratingSelect');
-  const ratingComment = document.getElementById('ratingComment');
-  const ratingModalClose = document.getElementById('ratingModalClose');
-  const ratingModalCancel = document.getElementById('ratingModalCancel');
-  const ratingModalSubmit = document.getElementById('ratingModalSubmit');
+// --- PUAN VER MODALİ ELEMENTLERİ ---
+const ratingModal = document.getElementById('ratingModal');
+const ratingModalClose = document.getElementById('ratingModalClose');
+const ratingModalCancel = document.getElementById('ratingModalCancel');
+const ratingModalSubmit = document.getElementById('ratingModalSubmit');
+const ratingSelect = document.getElementById('ratingSelect');
+const ratingComment = document.getElementById('ratingComment');
+let activeVenueForRating = null;
 
+// --- DETAY / YORUM MODALİ ELEMENTLERİ ---
+const detailsModal = document.getElementById('detailsModal');
+const detailsTitle = document.getElementById('detailsTitle');
+const detailsRating = document.getElementById('detailsRating');
+const detailsDistrict = document.getElementById('detailsDistrict');
+const detailsNotes = document.getElementById('detailsNotes');
+const detailsClose = document.getElementById('detailsClose');
+const detailsCloseBottom = document.getElementById('detailsCloseBottom');
+
+      // --- DETAY MODALİNİ AÇ / KAPAT ---
+
+function openDetailsModal(venue) {
+  // Başlık
+  detailsTitle.textContent = venue.name || 'Mekan Detayı';
+
+  // Puan ve oy sayısı
+  const ratingValue = Number(venue.rating ?? 0);
+  const votesValue = Number(venue.votes ?? 0);
+
+  if (votesValue > 0) {
+    detailsRating.textContent = `${ratingValue.toFixed(1)} • ${votesValue} oy`;
+  } else {
+    detailsRating.textContent = 'Henüz oy yok';
+  }
+
+  // Bölge
+  detailsDistrict.textContent = venue.district || '-';
+
+  // Not
+  detailsNotes.textContent = venue.notes || '-';
+
+  // Modali göster
+  detailsModal.classList.remove('hidden');
+}
+
+function closeDetailsModal() {
+  detailsModal.classList.add('hidden');
+}
+
+// Kapatma butonları ve overlay tıklaması
+detailsClose.addEventListener('click', closeDetailsModal);
+detailsCloseBottom.addEventListener('click', closeDetailsModal);
+
+detailsModal.addEventListener('click', (event) => {
+  if (event.target === detailsModal) {
+    closeDetailsModal();
+  }
+});
+      
   let activeDistrict = 'all';
   let venuesCache = [];
   let activeVenueForRating = null;
