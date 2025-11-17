@@ -3,10 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Coffee Star • Coffee Box – Bodrum Pilot</title>
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.0/dist/umd/supabase.min.js"></script>
@@ -504,10 +501,7 @@
       <!-- MAIN CONTENT -->
       <main class="content">
         <!-- CUSTOMER PANEL -->
-        <section
-          class="panel"
-          id="customerPanel"
-        >
+        <section class="panel" id="customerPanel">
           <div class="panel-header-row">
             <div class="panel-title">
               <h2>Yakındaki Kahve Mekanları</h2>
@@ -523,28 +517,14 @@
 
           <!-- Filter pills -->
           <div class="filter-row">
-            <button
-              class="filter-pill active"
-              data-district="all"
-            >
+            <button class="filter-pill active" data-district="all">
               Tüm bölgeler
             </button>
-            <button
-              class="filter-pill"
-              data-district="Bodrum Merkez"
-            >
+            <button class="filter-pill" data-district="Bodrum Merkez">
               Bodrum Merkez
             </button>
-            <button
-              class="filter-pill"
-              data-district="Bitez"
-            >
-              Bitez
-            </button>
-            <button
-              class="filter-pill"
-              data-district="Turgutreis"
-            >
+            <button class="filter-pill" data-district="Bitez">Bitez</button>
+            <button class="filter-pill" data-district="Turgutreis">
               Turgutreis
             </button>
           </div>
@@ -565,11 +545,7 @@
         </section>
 
         <!-- BUSINESS PANEL -->
-        <section
-          class="panel"
-          id="businessPanel"
-          style="display: none"
-        >
+        <section class="panel" id="businessPanel" style="display: none">
           <div class="panel-title-small">
             Coffee Box • İşletme Başvuru Formu (Bodrum Pilot)
           </div>
@@ -593,10 +569,7 @@
 
                 <div class="form-field">
                   <label>Bölge / İlçe</label>
-                  <select
-                    name="district"
-                    required
-                  >
+                  <select name="district" required>
                     <option value="">Seçiniz</option>
                     <option value="Bodrum Merkez">Bodrum Merkez</option>
                     <option value="Bitez">Bitez</option>
@@ -626,49 +599,41 @@
             </div>
 
             <div class="form-actions">
-              <button
-                type="submit"
-                class="btn-main"
-              >
+              <button type="submit" class="btn-main">
                 Başvuruyu Gönder
               </button>
             </div>
 
             <div class="small-note">
               Bu pilot sürümde form verileri yalnızca demo amaçlı kaydedilir.
-              Global lansmanda tüm başvurular Coffee Box ekibi tarafından
-              tek tek değerlendirilecektir.
+              Global lansmanda tüm başvurular Coffee Box ekibi tarafından tek
+              tek değerlendirilecektir.
             </div>
           </form>
 
-          <div
-            class="biz-list"
-            id="bizList"
-          >
-            <!-- İleride başvurular burada listelenebilir -->
+          <div class="biz-list" id="bizList">
+            <!-- Başvurular burada listelenecek -->
           </div>
         </section>
       </main>
 
       <!-- FOOTER -->
       <footer class="footer">
-        <span>TiT</span> Technologies • Coffee Box 
+        <span>TiT</span> Technologies • Coffee Box
       </footer>
     </div>
 
-    <!-- APP SCRIPT -->
+    <!-- APP SCRIPT (TEK BLOK) -->
     <script>
       // --- SUPABASE AYARLARI ---
+      const supabaseUrl = "https://girurtvcbudkjrvfjdte.supabase.co";
+      const supabaseKey =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpcnVydHZjYnVka2pydmZqZHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzMDA1ODksImV4cCI6MjA3ODg3NjU4OX0.n2Q9bvirUMIFgH1l4G7prZHCvr1wxwzrSGZw9OCUJ9A";
 
-      // --- SUPABASE AYARLARI ---
-      const supabaseUrl = 'https://girurtvcbudkjrvfjdte.supabase.co';
-      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpcnVydHZjYnVka2pydmZqZHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzMDA1ODksImV4cCI6MjA3ODg3NjU4OX0.n2Q9bvirUMIFgH1l4G7prZHCvr1wxwzrSGZw9OCUJ9A';  
-      
       const { createClient } = window.supabase;
       const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
       // --- STATE & DOM ---
-
       const venueList = document.getElementById("venueList");
       const filterButtons = document.querySelectorAll(".filter-pill");
       const distanceNote = document.getElementById("distanceNote");
@@ -681,8 +646,7 @@
       let activeDistrict = "all";
       let venuesCache = [];
 
-      // --- SUPABASE ROW → FRONTEND NESNE ---
-
+      // --- VENUE MAP ---
       function mapRowToVenue(row) {
         return {
           id: row.id,
@@ -691,7 +655,11 @@
           rating: typeof row.rating === "number" ? row.rating : 0,
           votes: typeof row.votes === "number" ? row.votes : 0,
           priceLevel:
-            row.pricelevel ?? row.price_level ?? row.price ?? row.priceLevel ?? 2,
+            row.pricelevel ??
+            row.price_level ??
+            row.price ??
+            row.priceLevel ??
+            2,
           tags: row.tags ?? [],
           notes: row.notes || row.description || "",
           wifi: row.wifi || "",
@@ -699,23 +667,21 @@
         };
       }
 
-      // --- KART ÇİZİMİ ---
-
+      // --- VENUE CARD RENDER ---
       function renderVenueCards(data) {
-        if (!venueList) {
-          console.error("venueList elementi bulunamadı");
-          return;
-        }
+        if (!venueList) return;
 
         venueList.innerHTML = "";
 
         const filtered = data.filter((v) => {
           if (activeDistrict === "all") return true;
-          return (v.district || "").toLowerCase() === activeDistrict.toLowerCase();
+          return (v.district || "").toLowerCase() ===
+            activeDistrict.toLowerCase();
         });
 
         if (filtered.length === 0) {
-          venueList.innerHTML = "<p>Bu bölge için henüz kayıtlı kahve mekanı yok.</p>";
+          venueList.innerHTML =
+            "<p>Bu bölge için henüz kayıtlı kahve mekanı yok.</p>";
           return;
         }
 
@@ -816,8 +782,7 @@
         });
       }
 
-      // --- SUPABASE'TEN VERİ ÇEK ---
-
+      // --- SUPABASE'TEN MEKANLARI ÇEK ---
       async function loadVenues() {
         try {
           const { data, error } = await supabaseClient.from("venues").select("*");
@@ -827,7 +792,7 @@
             return;
           }
 
-          console.log("Supabase Data:", data);
+          console.log("Supabase Data (venues):", data);
           venuesCache = (data || []).map(mapRowToVenue);
           renderVenueCards(venuesCache);
         } catch (err) {
@@ -836,8 +801,73 @@
         }
       }
 
-      // --- FİLTRE BUTONLARI ---
+      // --- İŞLETME BAŞVURUSU KAYDET ---
+      async function addBusinessApplication(payload) {
+        const { data, error } = await supabaseClient
+          .from("business_applications")
+          .insert([payload])
+          .select();
 
+        if (error) {
+          console.error("İşletme başvurusu kaydedilemedi:", error);
+          throw error;
+        }
+
+        return data;
+      }
+
+      // --- İŞLETME BAŞVURULARINI LİSTELE ---
+      function renderBusinessApplications(applications) {
+        if (!bizList) return;
+
+        if (!applications.length) {
+          bizList.innerHTML = "<p>Henüz başvuru yok.</p>";
+          return;
+        }
+
+        bizList.innerHTML = "";
+
+        applications.forEach((app) => {
+          const row = document.createElement("div");
+          row.className = "biz-item";
+
+          row.innerHTML = `
+            <div>
+              <span class="name">${app.name || "-"}</span>
+              <span class="district"> • ${app.district || ""}</span>
+            </div>
+            <div>
+              <span>${app.email || ""}</span>
+              <span style="margin-left:8px; font-weight:600;">${
+                app.status || ""
+              }</span>
+            </div>
+          `;
+
+          bizList.appendChild(row);
+        });
+      }
+
+      async function loadBusinessApplications() {
+        if (!bizList) return;
+
+        const { data, error } = await supabaseClient
+          .from("business_applications")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.error("Başvurular alınamadı:", error);
+          bizList.innerHTML =
+            "<p>Başvurular yüklenirken hata oluştu.</p>";
+          return;
+        }
+
+        console.log("Supabase Data (business_applications):", data);
+        renderBusinessApplications(data || []);
+      }
+
+      // --- FİLTRE BUTONLARI ---
       filterButtons.forEach((btn) => {
         btn.addEventListener("click", () => {
           filterButtons.forEach((b) => b.classList.remove("active"));
@@ -848,7 +878,6 @@
       });
 
       // --- MOD (Müşteri / İşletme) BUTONLARI ---
-
       modeButtons.forEach((btn) => {
         btn.addEventListener("click", () => {
           modeButtons.forEach((b) => b.classList.remove("active"));
@@ -865,8 +894,7 @@
         });
       });
 
-      // --- GEOLOCATION BİLGİ METNİ (demo) ---
-
+      // --- GEOLOCATION MESAJI (demo) ---
       if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
           () => {
@@ -883,270 +911,42 @@
           "📍 Tarayıcınız konum desteği sunmuyor. Bodrum mekanları yaklaşık mesafeye göre listeleniyor.";
       }
 
-      // --- İŞLETME FORMU (şimdilik sadece console.log) ---
+      // --- İŞLETME FORMU SUBMIT ---
+      if (bizForm) {
+        bizForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
 
-      bizForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const formData = new FormData(bizForm);
-        const payload = Object.fromEntries(formData.entries());
-        console.log("İşletme başvurusu (demo):", payload);
-        alert(
-          "Başvurunuz demo ortamında alındı. Global lansman aşamasında Coffee Box ekibi sizinle iletişime geçecek."
-        );
-        bizForm.reset();
-      });
+          const formData = new FormData(bizForm);
+          const payload = {
+            name: formData.get("name"),
+            district: formData.get("district"),
+            email: formData.get("email"),
+            notes: formData.get("notes"),
+            status: "pending",
+          };
+
+          console.log("İşletme başvurusu (giden payload):", payload);
+
+          try {
+            const saved = await addBusinessApplication(payload);
+            console.log("İşletme başvurusu kaydedildi:", saved);
+            alert(
+              "Başvurunuz alındı! Demo sürümdeyiz; Coffee Box ekibi başvurunuzu değerlendirecek."
+            );
+            bizForm.reset();
+            await loadBusinessApplications();
+          } catch (err) {
+            console.error(err);
+            alert(
+              "Başvuru kaydedilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin."
+            );
+          }
+        });
+      }
 
       // --- INIT ---
-
       loadVenues();
+      loadBusinessApplications();
     </script>
-    <script>
-(function () {
-  'use strict';
-
-  // --- SUPABASE AYARLARI ---
-  const supabaseUrl = 'https://girurtvcbudkjrvfjdte.supabase.co';
-  const supabaseKey =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpcnVydHZjYnVka2pydmZqZHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzMDA1ODksImV4cCI6MjA3ODg3NjU4OX0.n2Q9bvirUMIFgH1l4G7prZHCvr1wxwzrSGZw9OCUJ9A';
-
-  const { createClient } = window.supabase;
-  const supabaseClient = createClient(supabaseUrl, supabaseKey);
-// İşletme başvurusunu Supabase'e kaydeden yardımcı fonksiyon
-async function addBusinessApplication(payload) {
- const { data, error } = await supabaseClient
-  .from('business_applications')
-  .insert([payload]);
-
-  if (error) {
-    console.error('İşletme başvurusu kaydedilemedi:', error);
-    throw error;
-  }
-
-  return data;
-}
-  // DOM 
-// ---- STATE & DOM ----
-
-const venueList = document.getElementById('venueList');
-const filterButtons = document.querySelectorAll('.filter-pill');
-const distanceNote = document.getElementById('distanceNote');
-const modeButtons = document.querySelectorAll('.mode-btn');
-const customerPanel = document.getElementById('customerPanel');
-const businessPanel = document.getElementById('businessPanel');
-const bizForm = document.getElementById('businessForm');
-const bizList = document.getElementById('bizList');
-// ---- İŞLETME BAŞVURU LİSTESİ (ADMIN) ----
-
-// Supabase'ten başvuru listesini çeker
-async function fetchBusinessApplications() {
-  const { data, error } = await supabaseClient
-    .from('business_applications')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('Başvurular alınamadı:', error);
-    return [];
-  }
-
-  return data || [];
-}
-
-// Çekilen başvuruları sayfadaki #bizList içine yazar
-function renderBusinessApplications(applications) {
-  if (!bizList) return;
-
-  if (!applications.length) {
-    bizList.innerHTML = '<p>Henüz başvuru yok.</p>';
-    return;
-  }
-
-  bizList.innerHTML = '';
-
-  applications.forEach((app) => {
-    const row = document.createElement('div');
-    row.className = 'biz-row';
-
-    row.innerHTML = `
-      <div class="biz-row-main">
-        <strong>${app.name || '-'}</strong>
-        <span>${app.district || ''}</span>
-      </div>
-      <div class="biz-row-meta">
-        <span>${app.contact_name || ''}</span>
-        <span>${app.email || ''}</span>
-        <span class="biz-status">${app.status || ''}</span>
-      </div>
-    `;
-
-    bizList.appendChild(row);
-  });
-}
-
-// Tek fonksiyon: önce veriyi çeker, sonra ekrana basar
-async function loadBusinessApplications() {
-  const apps = await fetchBusinessApplications();
-  renderBusinessApplications(apps);
-}
-let activeDistrict = 'all';
-let venuesCache = [];
-// --- İŞLETME BAŞVURU FORMU ---
-
-// ---- İŞLETME BAŞVURU FORMU ----
-if (bizForm) {
-  bizForm.addEventListener('submit', async (event) => {
-    event.preventDefault(); // sayfanın yenilenmesini engelle
-
-    const formData = new FormData(bizForm);
-
-    const payload = {
-      name:         formData.get('name'),
-      district:     formData.get('district'),
-      address:      formData.get('address'),
-      contact_name: formData.get('contact_name'),
-      phone:        formData.get('phone'),
-      email:        formData.get('email'),
-      instagram:    formData.get('instagram'),
-      notes:        formData.get('notes'),
-      status:       'pending', // yeni başvurular "pending" başlasın
-    };
-
-    try {
-      await addBusinessApplication(payload);
-      bizForm.reset();
-      alert('Başvurunuz kaydedildi, teşekkür ederiz!');
-      await loadBusinessApplications(); // yeni kayıt eklensin
-    } catch (error) {
-      console.error(error);
-      alert('Başvuru kaydedilirken hata oluştu.');
-    }
-  });
-
-  // Sayfa açıldığında mevcut başvuruları yükle
-  loadBusinessApplications();
-}
-  let activeDistrict = 'all'
-  let venuesCache = []
-
-  if (distanceNote) {
-    distanceNote.textContent =
-      '📍 Konum izni bu demo sürümde sabit; gerçek sistemde gerçek mesafeye göre sıralanacak.';
-  }
-
-  function mapRowToVenue(row) {
-    return {
-      id: row.id,
-      name: row.name || '',
-      district: row.district || 'Bodrum Merkez',
-      rating: Number(row.rating) || 0,
-      votes: Number(row.votes) || 0,
-      priceLevel: Number(row.price_level) || 0,
-      tags: Array.isArray(row.tags) ? row.tags : [],
-      notes: row.notes || '',
-      wifi: row.wifi || '',
-      approxDistance: Number(row.approx_distance_km) || 0
-    };
-  }
-
-  function renderVenueCards(list) {
-    if (!venueList) return;
-
-    const filtered = list.filter(v =>
-      activeDistrict === 'all'
-        ? true
-        : (v.district || '').toLowerCase() === activeDistrict.toLowerCase()
-    );
-
-    venueList.innerHTML = '';
-
-    if (filtered.length === 0) {
-      venueList.innerHTML = '<p>Bu bölge için kayıtlı mekan yok.</p>';
-      return;
-    }
-
-    filtered.forEach(v =>
-      venueList.insertAdjacentHTML(
-        'beforeend',
-        `
-        <div class="card">
-          <div class="card-header-row">
-            <div class="card-header-left">
-              <h3>${v.name}</h3>
-              <div class="meta">${v.district}</div>
-              ${
-                v.approxDistance
-                  ? `<div class="meta">~${v.approxDistance.toFixed(
-                      1
-                    )} km tahmini mesafe</div>`
-                  : ''
-              }
-            </div>
-            <div class="card-header-right">
-              ${v.rating.toFixed(1)} ★ ${v.votes} oy
-            </div>
-          </div>
-
-          <div class="card-body">
-            ${v.notes ? `<p>${v.notes}</p>` : ''}
-            ${v.wifi ? `<div class="meta">${v.wifi}</div>` : ''}
-            ${
-              v.tags.length > 0
-                ? `<div class="tag-row">${v.tags
-                    .map(t => `<span class="tag">${t}</span>`)
-                    .join('')}</div>`
-                : ''
-            }
-          </div>
-
-          <div class="card-footer-row">
-            <button class="btn-sm" onclick="alert('${v.name}')">Detay / Yorum</button>
-            <button class="btn-sm primary">Puan Ver</button>
-          </div>
-        </div>
-      `
-      )
-    );
-  }
-
-  async function loadVenues() {
-    const { data, error } = await supabaseClient
-      .from('venues')
-      .select('*')
-      .order('id', { ascending: true });
-
-    if (error) {
-      console.error(error);
-      venueList.innerHTML = '<p>Veri yüklenemedi.</p>';
-      return;
-    }
-
-    venuesCache = (data || []).map(mapRowToVenue);
-    renderVenueCards(venuesCache);
-  }
-
-  filterButtons.forEach(btn =>
-    btn.addEventListener('click', () => {
-      filterButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      activeDistrict = btn.dataset.district || 'all';
-      renderVenueCards(venuesCache);
-    })
-  );
-
-  modeButtons.forEach(btn =>
-    btn.addEventListener('click', () => {
-      modeButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const mode = btn.dataset.mode;
-      customerPanel.classList.toggle('active', mode === 'customer');
-      businessPanel.classList.toggle('active', mode === 'business');
-    })
-  );
-
-  loadVenues();
-})();
-</script>
   </body>
 </html>
