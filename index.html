@@ -899,5 +899,148 @@
 
       loadVenues();
     </script>
+    <script>
+(function () {
+  'use strict';
+
+  // --- SUPABASE AYARLARI ---
+  const supabaseUrl = 'https://girurtvcbudkjrvfjdte.supabase.co';
+  const supabaseKey =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpcnVydHZjYnVka2pydmZqZHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzMDA1ODksImV4cCI6MjA3ODg3NjU4OX0.n2Q9bvirUMIFgH1l4G7prZHCvr1wxwzrSGZw9OCUJ9A';
+
+  const { createClient } = window.supabase;
+  const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+  // DOM 
+  const venueList = document.getElementById('venueList');
+  const filterButtons = document.querySelectorAll('.filter-pill');
+  const modeButtons = document.querySelectorAll('.mode-btn');
+  const customerPanel = document.getElementById('customerPanel');
+  const businessPanel = document.getElementById('businessPanel');
+  const distanceNote = document.getElementById('distanceNote');
+
+  let activeDistrict = 'all'
+  let venuesCache = []
+
+  if (distanceNote) {
+    distanceNote.textContent =
+      '📍 Konum izni bu demo sürümde sabit; gerçek sistemde gerçek mesafeye göre sıralanacak.';
+  }
+
+  function mapRowToVenue(row) {
+    return {
+      id: row.id,
+      name: row.name || '',
+      district: row.district || 'Bodrum Merkez',
+      rating: Number(row.rating) || 0,
+      votes: Number(row.votes) || 0,
+      priceLevel: Number(row.price_level) || 0,
+      tags: Array.isArray(row.tags) ? row.tags : [],
+      notes: row.notes || '',
+      wifi: row.wifi || '',
+      approxDistance: Number(row.approx_distance_km) || 0
+    };
+  }
+
+  function renderVenueCards(list) {
+    if (!venueList) return;
+
+    const filtered = list.filter(v =>
+      activeDistrict === 'all'
+        ? true
+        : (v.district || '').toLowerCase() === activeDistrict.toLowerCase()
+    );
+
+    venueList.innerHTML = '';
+
+    if (filtered.length === 0) {
+      venueList.innerHTML = '<p>Bu bölge için kayıtlı mekan yok.</p>';
+      return;
+    }
+
+    filtered.forEach(v =>
+      venueList.insertAdjacentHTML(
+        'beforeend',
+        `
+        <div class="card">
+          <div class="card-header-row">
+            <div class="card-header-left">
+              <h3>${v.name}</h3>
+              <div class="meta">${v.district}</div>
+              ${
+                v.approxDistance
+                  ? `<div class="meta">~${v.approxDistance.toFixed(
+                      1
+                    )} km tahmini mesafe</div>`
+                  : ''
+              }
+            </div>
+            <div class="card-header-right">
+              ${v.rating.toFixed(1)} ★ ${v.votes} oy
+            </div>
+          </div>
+
+          <div class="card-body">
+            ${v.notes ? `<p>${v.notes}</p>` : ''}
+            ${v.wifi ? `<div class="meta">${v.wifi}</div>` : ''}
+            ${
+              v.tags.length > 0
+                ? `<div class="tag-row">${v.tags
+                    .map(t => `<span class="tag">${t}</span>`)
+                    .join('')}</div>`
+                : ''
+            }
+          </div>
+
+          <div class="card-footer-row">
+            <button class="btn-sm" onclick="alert('${v.name}')">Detay / Yorum</button>
+            <button class="btn-sm primary">Puan Ver</button>
+          </div>
+        </div>
+      `
+      )
+    );
+  }
+
+  async function loadVenues() {
+    const { data, error } = await supabaseClient
+      .from('venues')
+      .select('*')
+      .order('id', { ascending: true });
+
+    if (error) {
+      console.error(error);
+      venueList.innerHTML = '<p>Veri yüklenemedi.</p>';
+      return;
+    }
+
+    venuesCache = (data || []).map(mapRowToVenue);
+    renderVenueCards(venuesCache);
+  }
+
+  filterButtons.forEach(btn =>
+    btn.addEventListener('click', () => {
+      filterButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      activeDistrict = btn.dataset.district || 'all';
+      renderVenueCards(venuesCache);
+    })
+  );
+
+  modeButtons.forEach(btn =>
+    btn.addEventListener('click', () => {
+      modeButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const mode = btn.dataset.mode;
+      customerPanel.classList.toggle('active', mode === 'customer');
+      businessPanel.classList.toggle('active', mode === 'business');
+    })
+  );
+
+  loadVenues();
+})();
+</script>
   </body>
 </html>
