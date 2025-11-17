@@ -910,7 +910,19 @@
 
   const { createClient } = window.supabase;
   const supabaseClient = createClient(supabaseUrl, supabaseKey);
+// İşletme başvurusunu Supabase'e kaydeden yardımcı fonksiyon
+async function addBusinessApplication(payload) {
+ const { data, error } = await supabaseClient
+  .from('business_applications')
+  .insert([payload]);
 
+  if (error) {
+    console.error('İşletme başvurusu kaydedilemedi:', error);
+    throw error;
+  }
+
+  return data;
+}
   // DOM 
   const venueList = document.getElementById('venueList');
   const filterButtons = document.querySelectorAll('.filter-pill');
@@ -918,7 +930,39 @@
   const customerPanel = document.getElementById('customerPanel');
   const businessPanel = document.getElementById('businessPanel');
   const distanceNote = document.getElementById('distanceNote');
+// --- İŞLETME BAŞVURU FORMU ---
 
+if (bizForm) {
+  bizForm.addEventListener('submit', async (event) => {
+    event.preventDefault(); // sayfanın yeniden yüklenmesini engelle
+
+    const formData = new FormData(bizForm);
+
+    // Formdaki input name'leri ile Supabase kolonlarını eşliyoruz
+    const payload = {
+      // Supabase tablosunda kolon adların bunlarsa aynen bırak
+      // Farklıysa sağ taraftaki değerleri kendi kolon adına göre değiştir
+      name:        formData.get('name'),
+      district:    formData.get('district'),
+      address:     formData.get('address'),
+      contact_name: formData.get('contactName'), // Supabase'de contact_name olmasını öneririm
+      phone:       formData.get('phone'),
+      email:       formData.get('email'),
+      instagram:   formData.get('instagram'),
+      notes:       formData.get('notes'),
+      status:      'pending'   // yeni başvurular "pending" olarak işaretlensin
+    };
+
+    try {
+      await addBusinessApplication(payload);
+      alert('Başvurunuz alındı, teşekkürler!');
+
+      bizForm.reset(); // formu temizle
+    } catch (err) {
+      alert('Bir hata oluştu, lütfen tekrar deneyin.');
+    }
+  });
+}
   let activeDistrict = 'all'
   let venuesCache = []
 
