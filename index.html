@@ -925,12 +925,19 @@ async function addBusinessApplication(payload) {
   return data;
 }
   // DOM 
-  const venueList = document.getElementById('venueList');
-  const filterButtons = document.querySelectorAll('.filter-pill');
-  const modeButtons = document.querySelectorAll('.mode-btn');
-  const customerPanel = document.getElementById('customerPanel');
-  const businessPanel = document.getElementById('businessPanel');
-  const distanceNote = document.getElementById('distanceNote');
+// ---- STATE & DOM ----
+
+const venueList = document.getElementById('venueList');
+const filterButtons = document.querySelectorAll('.filter-pill');
+const distanceNote = document.getElementById('distanceNote');
+const modeButtons = document.querySelectorAll('.mode-btn');
+const customerPanel = document.getElementById('customerPanel');
+const businessPanel = document.getElementById('businessPanel');
+const bizForm = document.getElementById('businessForm');
+const bizList = document.getElementById('bizList');
+
+let activeDistrict = 'all';
+let venuesCache = [];
 // --- İŞLETME BAŞVURU FORMU ---
 
 if (bizForm) {
@@ -940,19 +947,17 @@ if (bizForm) {
     const formData = new FormData(bizForm);
 
     // Formdaki input name'leri ile Supabase kolonlarını eşliyoruz
-    const payload = {
-      // Supabase tablosunda kolon adların bunlarsa aynen bırak
-      // Farklıysa sağ taraftaki değerleri kendi kolon adına göre değiştir
-      name:        formData.get('name'),
-      district:    formData.get('district'),
-      address:     formData.get('address'),
-      contact_name: formData.get('contactName'), // Supabase'de contact_name olmasını öneririm
-      phone:       formData.get('phone'),
-      email:       formData.get('email'),
-      instagram:   formData.get('instagram'),
-      notes:       formData.get('notes'),
-      status:      'pending'   // yeni başvurular "pending" olarak işaretlensin
-    };
+  const payload = {
+  name:         formData.get('name'),
+  district:     formData.get('district'),
+  address:      formData.get('address'),
+  contact_name: formData.get('contact_name'), // input name="contact_name" olmalı
+  phone:        formData.get('phone'),
+  email:        formData.get('email'),
+  instagram:    formData.get('instagram'),
+  notes:        formData.get('notes'),
+  status:       'pending', // yeni başvuru beklemede
+};
 
     try {
       await addBusinessApplication(payload);
